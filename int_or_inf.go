@@ -2,54 +2,38 @@ package openairt
 
 import (
 	"encoding/json"
+	"math"
+)
+
+const (
+	// Inf is the maximum value for an IntOrInf.
+	Inf IntOrInf = math.MaxInt
 )
 
 // IntOrInf is a type that can be either an int or "inf".
-type IntOrInf struct {
-	value int
-	inf   bool
-}
-
-// Inf returns an IntOrInf with the value "inf".
-func Inf() IntOrInf {
-	return IntOrInf{
-		inf: true,
-	}
-}
-
-// Int returns an IntOrInf with the given value.
-func Int(value int) IntOrInf {
-	return IntOrInf{
-		value: value,
-	}
-}
+type IntOrInf int
 
 // IsInf returns true if the value is "inf".
 func (m IntOrInf) IsInf() bool {
-	return m.inf
-}
-
-// Value returns the value as an int.
-func (m IntOrInf) Value() int {
-	return m.value
+	return m == Inf
 }
 
 // MarshalJSON marshals the IntOrInf to JSON.
 func (m IntOrInf) MarshalJSON() ([]byte, error) {
-	if m.inf {
+	if m == Inf {
 		return []byte("\"inf\""), nil
 	}
-	return json.Marshal(m.value)
+	return json.Marshal(int(m))
 }
 
 // UnmarshalJSON unmarshals the IntOrInf from JSON.
 func (m *IntOrInf) UnmarshalJSON(data []byte) error {
 	if string(data) == "\"inf\"" {
-		m.inf = true
+		*m = Inf
 		return nil
 	}
 	if len(data) == 0 {
 		return nil
 	}
-	return json.Unmarshal(data, &m.value)
+	return json.Unmarshal(data, (*int)(m))
 }

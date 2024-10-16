@@ -121,16 +121,18 @@ func TestSessionCreatedEvent(t *testing.T) {
 			InputAudioFormat:        openairt.AudioFormatPcm16,
 			OutputAudioFormat:       openairt.AudioFormatPcm16,
 			InputAudioTranscription: nil,
-			TurnDetection: &openairt.TurnDetection{
-				Type:              openairt.TurnDetectionTypeServerVad,
-				Threshold:         0.5,
-				PrefixPaddingMs:   300,
-				SilenceDurationMs: 200,
+			TurnDetection: &openairt.ServerTurnDetection{
+				Type: openairt.ServerTurnDetectionTypeServerVad,
+				TurnDetectionParams: openairt.TurnDetectionParams{
+					Threshold:         0.5,
+					PrefixPaddingMs:   300,
+					SilenceDurationMs: 200,
+				},
 			},
 			Tools:           []openairt.Tool{},
 			ToolChoice:      openairt.ServerToolChoice{String: openairt.ToolChoiceAuto},
 			Temperature:     &temperature,
-			MaxOutputTokens: openairt.Int(0),
+			MaxOutputTokens: 0,
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
@@ -153,7 +155,6 @@ func TestSessionUpdatedEvent(t *testing.T) {
         "input_audio_format": "pcm16",
         "output_audio_format": "pcm16",
         "input_audio_transcription": {
-            "enabled": true,
             "model": "whisper-1"
         },
         "turn_detection": {
@@ -181,16 +182,15 @@ func TestSessionUpdatedEvent(t *testing.T) {
 			InputAudioFormat:  openairt.AudioFormatPcm16,
 			OutputAudioFormat: openairt.AudioFormatPcm16,
 			InputAudioTranscription: &openairt.InputAudioTranscription{
-				Enabled: true,
-				Model:   "whisper-1",
+				Model: "whisper-1",
 			},
-			TurnDetection: &openairt.TurnDetection{
-				Type: openairt.TurnDetectionTypeNone,
+			TurnDetection: &openairt.ServerTurnDetection{
+				Type: openairt.ServerTurnDetectionTypeNone,
 			},
 			Tools:           []openairt.Tool{},
 			ToolChoice:      openairt.ServerToolChoice{String: openairt.ToolChoiceNone},
 			Temperature:     &temperature,
-			MaxOutputTokens: openairt.Int(200),
+			MaxOutputTokens: 200,
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
@@ -211,7 +211,6 @@ func TestSessionUpdatedEvent(t *testing.T) {
 			"input_audio_format": "pcm16",
 			"output_audio_format": "pcm16",
 			"input_audio_transcription": {
-				"enabled": true,
 				"model": "whisper-1"
 			},
 			"turn_detection": {
@@ -223,7 +222,7 @@ func TestSessionUpdatedEvent(t *testing.T) {
 			"max_output_tokens": "inf"
 		}
 	}`
-	expected.Session.MaxOutputTokens = openairt.Inf()
+	expected.Session.MaxOutputTokens = openairt.Inf
 	actual, err = openairt.UnmarshalServerEvent([]byte(data))
 	assert.NoError(t, err)
 	assert.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())

@@ -23,14 +23,15 @@ func TestSessionUpdateEvent(t *testing.T) {
 			InputAudioFormat:  openairt.AudioFormatPcm16,
 			OutputAudioFormat: openairt.AudioFormatG711Ulaw,
 			InputAudioTranscription: &openairt.InputAudioTranscription{
-				Enabled: true,
-				Model:   openai.Whisper1,
+				Model: openai.Whisper1,
 			},
-			TurnDetection: &openairt.TurnDetection{
-				Type:              openairt.TurnDetectionTypeServerVad,
-				Threshold:         0.5,
-				PrefixPaddingMs:   1000,
-				SilenceDurationMs: 2000,
+			TurnDetection: &openairt.ClientTurnDetection{
+				Type: openairt.ClientTurnDetectionTypeServerVad,
+				TurnDetectionParams: openairt.TurnDetectionParams{
+					Threshold:         0.5,
+					PrefixPaddingMs:   1000,
+					SilenceDurationMs: 2000,
+				},
 			},
 			Tools: []openairt.Tool{
 				{
@@ -54,7 +55,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 				},
 			},
 			Temperature:     &temperature,
-			MaxOutputTokens: openairt.Int(100),
+			MaxOutputTokens: 100,
 		},
 	}
 
@@ -73,7 +74,6 @@ func TestSessionUpdateEvent(t *testing.T) {
 			"input_audio_format": "pcm16",
 			"output_audio_format": "g711-ulaw",
 			"input_audio_transcription": {
-					"enabled": true,
 					"model": "whisper-1"
 			},
 			"turn_detection": {
@@ -112,6 +112,59 @@ func TestSessionUpdateEvent(t *testing.T) {
 	"type": "session.update"
 }`
 	assert.JSONEq(t, expected, string(data))
+
+	message.Session.MaxOutputTokens = 0
+	data, err = json.Marshal(message)
+	assert.NoError(t, err)
+	expected = `{
+		"event_id": "test-id",
+		"session": {
+				"modalities": [
+						"text",
+						"audio"
+				],
+				"instructions": "test-instructions",
+				"voice": "alloy",
+				"input_audio_format": "pcm16",
+				"output_audio_format": "g711-ulaw",
+				"input_audio_transcription": {
+						"model": "whisper-1"
+				},
+				"turn_detection": {
+						"type": "server_vad",
+						"threshold": 0.5,
+						"prefix_padding_ms": 1000,
+						"silence_duration_ms": 2000
+				},
+				"tools": [
+						{
+								"type": "function",
+								"name": "test-tool",
+								"description": "",
+								"parameters": {
+										"type": "object",
+										"properties": {
+												"location": {
+														"type": "string"
+												}
+										},
+										"required": [
+												"location"
+										]
+								}
+						}
+				],
+				"tool_choice": {
+						"type": "function",
+						"function": {
+								"name": "test-tool"
+						}
+				},
+				"temperature": 0.5
+		},
+		"type": "session.update"
+	}`
+	assert.JSONEq(t, expected, string(data))
 }
 
 func TestSessionUpdateEventSimple(t *testing.T) {
@@ -128,7 +181,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 			Tools:                   nil,
 			ToolChoice:              nil,
 			Temperature:             &temperature,
-			MaxOutputTokens:         openairt.Int(100),
+			MaxOutputTokens:         100,
 		},
 	}
 
@@ -144,6 +197,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 			"voice": "alloy",
 			"input_audio_format": "pcm16",
 			"output_audio_format": "g711-ulaw",
+			"turn_detection": null,
 			"temperature": 0.5,
 			"max_output_tokens": 100
 	},
@@ -313,7 +367,7 @@ func TestResponseCreateEvent(t *testing.T) {
 			Tools:             nil,
 			ToolChoice:        openairt.ToolChoiceAuto,
 			Temperature:       nil,
-			MaxOutputTokens:   openairt.Int(100),
+			MaxOutputTokens:   100,
 		},
 	}
 	data, err := json.MarshalIndent(message, "", "\t")
@@ -335,7 +389,7 @@ func TestResponseCreateEvent(t *testing.T) {
 	assert.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
-	message.Response.MaxOutputTokens = openairt.Inf()
+	message.Response.MaxOutputTokens = openairt.Inf
 	data, err = json.Marshal(message)
 	assert.NoError(t, err)
 	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711-ulaw","tool_choice":"auto","max_output_tokens":"inf"},"type":"response.create"}`

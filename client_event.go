@@ -42,7 +42,7 @@ type ClientSession struct {
 	// Configuration for input audio transcription. Can be set to `nil` to turn off.
 	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
 	// Configuration for turn detection. Can be set to `nil` to turn off.
-	TurnDetection *TurnDetection `json:"turn_detection,omitempty"`
+	TurnDetection *ClientTurnDetection `json:"turn_detection"`
 	// Tools (functions) available to the model.
 	Tools []Tool `json:"tools,omitempty"`
 	// How the model chooses tools. Options are "auto", "none", "required", or specify a function.

@@ -29,22 +29,52 @@ const (
 	ModalityAudio Modality = "audio"
 )
 
+type ClientTurnDetectionType string
+
+const (
+	ClientTurnDetectionTypeServerVad ClientTurnDetectionType = "server_vad"
+)
+
+type ServerTurnDetectionType string
+
+const (
+	ServerTurnDetectionTypeNone      ServerTurnDetectionType = "none"
+	ServerTurnDetectionTypeServerVad ServerTurnDetectionType = "server_vad"
+)
+
 type TurnDetectionType string
 
 const (
-	TurnDetectionTypeNone      TurnDetectionType = "none"
+	// TurnDetectionTypeNone means turn detection is disabled.
+	// This can only be used in ServerSession, not in ClientSession.
+	// If you want to disable turn detection, you should send SessionUpdateEvent with TurnDetection set to nil.
+	TurnDetectionTypeNone TurnDetectionType = "none"
+	// TurnDetectionTypeServerVad use server-side VAD to detect turn.
+	// This is default value for newly created session.
 	TurnDetectionTypeServerVad TurnDetectionType = "server_vad"
 )
 
-type TurnDetection struct {
-	// The type of turn detection ("server_vad" or "none").
-	Type TurnDetectionType `json:"type"`
+type TurnDetectionParams struct {
 	// Activation threshold for VAD.
 	Threshold float64 `json:"threshold,omitempty"`
 	// Audio included before speech starts (in milliseconds).
 	PrefixPaddingMs int `json:"prefix_padding_ms,omitempty"`
 	// Duration of silence to detect speech stop (in milliseconds).
 	SilenceDurationMs int `json:"silence_duration_ms,omitempty"`
+}
+
+type ClientTurnDetection struct {
+	// Type of turn detection, only "server_vad" is currently supported.
+	Type ClientTurnDetectionType `json:"type"`
+
+	TurnDetectionParams
+}
+
+type ServerTurnDetection struct {
+	// The type of turn detection ("server_vad" or "none").
+	Type ServerTurnDetectionType `json:"type"`
+
+	TurnDetectionParams
 }
 
 type ToolType string
@@ -87,8 +117,6 @@ const (
 )
 
 type InputAudioTranscription struct {
-	// Whether input audio transcription is enabled.
-	Enabled bool `json:"enabled"`
 	// The model used for transcription.
 	Model string `json:"model"`
 }
@@ -217,7 +245,7 @@ type ServerSession struct {
 	// Configuration for input audio transcription.
 	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
 	// Configuration for turn detection.
-	TurnDetection *TurnDetection `json:"turn_detection,omitempty"`
+	TurnDetection *ServerTurnDetection `json:"turn_detection,omitempty"`
 	// Tools (functions) available to the model.
 	Tools []Tool `json:"tools,omitempty"`
 	// How the model chooses tools.
