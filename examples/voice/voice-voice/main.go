@@ -5,18 +5,24 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
 	"github.com/WqyJh/go-openai-realtime/examples/voice/pcm"
+	"github.com/WqyJh/go-openai-realtime/examples/voice/recorder"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
+	"github.com/gordonklaus/portaudio"
+	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
+
 	socksProxy := os.Getenv("SOCKS_PROXY")
 	if socksProxy != "" {
 		proxyURL, err := url.Parse(socksProxy)
@@ -41,28 +47,36 @@ func main() {
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
 		case openairt.ServerEventTypeResponseAudioTranscriptDelta:
-			fmt.Printf(event.(openairt.ResponseAudioTranscriptDeltaEvent).Delta)
+			// ignore
+		case openairt.ServerEventTypeResponseAudioTranscriptDone:
+			fmt.Printf("[response] %s\n", event.(openairt.ResponseAudioTranscriptDoneEvent).Transcript)
 		}
 	}
 
 	// Full response
 	responseHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioTranscriptDone:
-			fmt.Printf("\n\n[full] %s\n\n", event.(openairt.ResponseAudioTranscriptDoneEvent).Transcript)
-			fmt.Print("> ")
+		case openairt.ServerEventTypeConversationItemInputAudioTranscriptionCompleted:
+			question := event.(openairt.ConversationItemInputAudioTranscriptionCompletedEvent).Transcript
+			fmt.Printf("\n[question] %s\n", question)
+		case openairt.ServerEventTypeResponseDone:
+			fmt.Print("\n> ")
 		}
 	}
 
-	// All event handler
-	allHandler := func(ctx context.Context, event openairt.ServerEvent) {
-		// data, err := json.Marshal(event)
-		// if err != nil {
-		// 	log.Fatal(err)
-		// }
-		// fmt.Printf("[%s] %s\n\n", event.ServerEventType(), string(data))
+	// Log handler
+	logHandler := func(ctx context.Context, event openairt.ServerEvent) {
+		// fmt.Printf("[%s]\n", event.ServerEventType())
 
-		// fmt.Printf("[%s]\n\n", event.ServerEventType())
+		switch event.ServerEventType() {
+		case openairt.ServerEventTypeError,
+			openairt.ServerEventTypeSessionUpdated:
+			// data, err := json.Marshal(event)
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
+			// fmt.Printf("[%s] %s\n", event.ServerEventType(), string(data))
+		}
 	}
 
 	// Init speaker
@@ -71,6 +85,11 @@ func main() {
 
 	streamers := make(chan *pcm.PCMStream, 100)
 	datas := make(chan []byte, 100)
+	beep.NewBuffer(beep.Format{
+		SampleRate:  beep.SampleRate(24000),
+		NumChannels: 1,
+		Precision:   2, // 16-bit PCM
+	})
 
 	// Audio response
 	audioResponseHandler := func(ctx context.Context, event openairt.ServerEvent) {
@@ -91,11 +110,12 @@ func main() {
 			for data := range datas {
 				fulldata = append(fulldata, data...)
 			}
+			os.WriteFile(fmt.Sprintf("%s.pcm", event.(openairt.ResponseAudioDoneEvent).EventID), fulldata, 0o644)
 			streamer := pcm.NewPCMStream(
 				fulldata,
 				beep.Format{
 					SampleRate:  beep.SampleRate(24000),
-					NumChannels: 2,
+					NumChannels: 1,
 					Precision:   2, // 16-bit PCM
 				},
 			)
@@ -111,56 +131,81 @@ func main() {
 				return
 			case streamer := <-streamers:
 				done := make(chan bool, 1)
-				speaker.Play(beep.Seq(streamer), beep.Callback(func() {
+				speaker.Play(beep.Seq(streamer, beep.Callback(func() {
 					done <- true
-				}))
+				})))
 				<-done // wait for done
 			}
 		}
 	}()
 
-	connHandler := openairt.NewConnHandler(ctx, conn, allHandler, responseDeltaHandler, responseHandler, audioResponseHandler)
+	connHandler := openairt.NewConnHandler(ctx, conn, logHandler, responseHandler, responseDeltaHandler, audioResponseHandler)
 	connHandler.Start()
 	defer connHandler.Stop()
 
-	err = conn.SendMessage(ctx, &openairt.SessionUpdateEvent{
+	err = conn.SendMessage(ctx, openairt.SessionUpdateEvent{
 		Session: openairt.ClientSession{
 			Modalities:        []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
 			Voice:             openairt.VoiceShimmer,
 			OutputAudioFormat: openairt.AudioFormatPcm16,
+			InputAudioTranscription: &openairt.InputAudioTranscription{
+				Model: openai.Whisper1,
+			},
+			TurnDetection: nil,
 		},
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
+	time.Sleep(1 * time.Second)
 
-	fmt.Println("Conversation")
+	fmt.Println("Conversation (input 'start' to start recording)")
 	fmt.Println("---------------------")
 	fmt.Print("> ")
 	s := bufio.NewScanner(os.Stdin)
+
+	// Audio init
+	portaudio.Initialize()
+	defer portaudio.Terminate()
+
+	var data io.Reader
+	var stop func()
+
+Loop:
 	for s.Scan() {
-		if s.Text() == "exit" || s.Text() == "quit" {
-			break
-		}
-		conn.SendMessage(ctx, &openairt.ConversationItemCreateEvent{
-			Item: openairt.MessageItem{
-				ID:     openairt.GenerateId("msg_", 10),
-				Status: openairt.ItemStatusCompleted,
-				Type:   openairt.MessageItemTypeMessage,
-				Role:   openairt.MessageRoleUser,
-				Content: []openairt.MessageContentPart{
-					{
-						Type: openairt.MessageContentTypeInputText,
-						Text: s.Text(),
-					},
+
+		switch s.Text() {
+		case "exit", "quit":
+			break Loop
+		case "start":
+			data, stop, err = recorder.Record(1, 24000, 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("Recording...(input 'stop' to stop recording)")
+			fmt.Print("> ")
+		case "stop":
+			if stop == nil {
+				log.Print("not recording")
+				continue
+			}
+			stop()
+			audioData, err := io.ReadAll(data)
+			if err != nil {
+				log.Fatal(err)
+			}
+			base64Audio := base64.StdEncoding.EncodeToString(audioData)
+			conn.SendMessage(ctx, openairt.InputAudioBufferAppendEvent{
+				Audio: base64Audio,
+			})
+			conn.SendMessage(ctx, openairt.InputAudioBufferCommitEvent{})
+			conn.SendMessage(ctx, openairt.ResponseCreateEvent{
+				Response: openairt.ResponseCreateParams{
+					Modalities:      []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
+					MaxOutputTokens: 4000,
 				},
-			},
-		})
-		conn.SendMessage(ctx, &openairt.ResponseCreateEvent{
-			Response: openairt.ResponseCreateParams{
-				Modalities:      []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-				MaxOutputTokens: openairt.Int(4000),
-			},
-		})
+			})
+		}
+
 	}
 }

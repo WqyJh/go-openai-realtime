@@ -88,7 +88,7 @@ func main() {
 		conn.SendMessage(ctx, &openairt.ResponseCreateEvent{
 			Response: openairt.ResponseCreateParams{
 				Modalities:      []openairt.Modality{openairt.ModalityText},
-				MaxOutputTokens: openairt.Int(100),
+				MaxOutputTokens: 4000,
 			},
 		})
 	}
