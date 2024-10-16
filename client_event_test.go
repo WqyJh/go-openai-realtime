@@ -54,7 +54,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 				},
 			},
 			Temperature:     &temperature,
-			MaxOutputTokens: 100,
+			MaxOutputTokens: openairt.Int(100),
 		},
 	}
 
@@ -128,7 +128,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 			Tools:                   nil,
 			ToolChoice:              nil,
 			Temperature:             &temperature,
-			MaxOutputTokens:         100,
+			MaxOutputTokens:         openairt.Int(100),
 		},
 	}
 
@@ -313,7 +313,7 @@ func TestResponseCreateEvent(t *testing.T) {
 			Tools:             nil,
 			ToolChoice:        openairt.ToolChoiceAuto,
 			Temperature:       nil,
-			MaxOutputTokens:   100,
+			MaxOutputTokens:   openairt.Int(100),
 		},
 	}
 	data, err := json.MarshalIndent(message, "", "\t")
@@ -335,9 +335,10 @@ func TestResponseCreateEvent(t *testing.T) {
 	assert.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
+	message.Response.MaxOutputTokens = openairt.Inf()
 	data, err = json.Marshal(message)
 	assert.NoError(t, err)
-	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711-ulaw","tool_choice":"auto","max_output_tokens":100},"type":"response.create"}`
+	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711-ulaw","tool_choice":"auto","max_output_tokens":"inf"},"type":"response.create"}`
 	assert.JSONEq(t, expected, string(data))
 }
 

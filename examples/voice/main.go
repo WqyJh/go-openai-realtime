@@ -121,12 +121,7 @@ func main() {
 
 	connHandler := openairt.NewConnHandler(ctx, conn, allHandler, responseDeltaHandler, responseHandler, audioResponseHandler)
 	connHandler.Start()
-	defer func() {
-		connHandler.Stop()
-		if err := connHandler.Err(); err != nil {
-			log.Printf("connHandler.Err(): %v", err)
-		}
-	}()
+	defer connHandler.Stop()
 
 	err = conn.SendMessage(ctx, &openairt.SessionUpdateEvent{
 		Session: openairt.ClientSession{
@@ -164,7 +159,7 @@ func main() {
 		conn.SendMessage(ctx, &openairt.ResponseCreateEvent{
 			Response: openairt.ResponseCreateParams{
 				Modalities:      []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-				MaxOutputTokens: 4000,
+				MaxOutputTokens: openairt.Int(4000),
 			},
 		})
 	}

@@ -18,4 +18,8 @@ func TestGenerateId(t *testing.T) {
 	t.Logf("generated: %s", generated)
 	assert.True(t, strings.HasPrefix(generated, "test_"))
 	assert.Equal(t, 20, len(generated))
+
+	generated = openairt.GenerateId("test_", 5)
+	t.Logf("generated: %s", generated)
+	assert.Equal(t, "test_", generated)
 }

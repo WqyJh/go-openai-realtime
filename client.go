@@ -64,24 +64,28 @@ type connectOption struct {
 
 type ConnectOption func(*connectOption)
 
+// WithModel sets the model to use for the connection.
 func WithModel(model string) ConnectOption {
 	return func(opts *connectOption) {
 		opts.model = model
 	}
 }
 
+// WithDialOptions sets the dial options for the connection.
 func WithDialOptions(dialOptions *websocket.DialOptions) ConnectOption {
 	return func(opts *connectOption) {
 		opts.dialOptions = dialOptions
 	}
 }
 
+// WithReadLimit sets the read limit for the connection.
 func WithReadLimit(limit int64) ConnectOption {
 	return func(opts *connectOption) {
 		opts.readLimit = limit
 	}
 }
 
+// Connect connects to the OpenAI Realtime API.
 func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, error) {
 	connectOpts := connectOption{
 		model: GPT4oRealtimePreview,

@@ -130,7 +130,7 @@ func TestSessionCreatedEvent(t *testing.T) {
 			Tools:           []openairt.Tool{},
 			ToolChoice:      openairt.ServerToolChoice{String: openairt.ToolChoiceAuto},
 			Temperature:     &temperature,
-			MaxOutputTokens: 0,
+			MaxOutputTokens: openairt.Int(0),
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
@@ -190,10 +190,41 @@ func TestSessionUpdatedEvent(t *testing.T) {
 			Tools:           []openairt.Tool{},
 			ToolChoice:      openairt.ServerToolChoice{String: openairt.ToolChoiceNone},
 			Temperature:     &temperature,
-			MaxOutputTokens: 200,
+			MaxOutputTokens: openairt.Int(200),
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
+	assert.NoError(t, err)
+	assert.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())
+	assert.Equal(t, expected, actual.(openairt.SessionUpdatedEvent))
+
+	data = `{
+		"event_id": "event_5678",
+		"type": "session.updated",
+		"session": {
+			"id": "sess_001",
+			"object": "realtime.session",
+			"model": "gpt-4o-realtime-preview-2024-10-01",
+			"modalities": ["text"],
+			"instructions": "New instructions",
+			"voice": "alloy",
+			"input_audio_format": "pcm16",
+			"output_audio_format": "pcm16",
+			"input_audio_transcription": {
+				"enabled": true,
+				"model": "whisper-1"
+			},
+			"turn_detection": {
+				"type": "none"
+			},
+			"tools": [],
+			"tool_choice": "none",
+			"temperature": 0.7,
+			"max_output_tokens": "inf"
+		}
+	}`
+	expected.Session.MaxOutputTokens = openairt.Inf()
+	actual, err = openairt.UnmarshalServerEvent([]byte(data))
 	assert.NoError(t, err)
 	assert.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())
 	assert.Equal(t, expected, actual.(openairt.SessionUpdatedEvent))

@@ -37,10 +37,14 @@ const (
 )
 
 type TurnDetection struct {
-	Type              TurnDetectionType `json:"type"`
-	Threshold         float64           `json:"threshold,omitempty"`
-	PrefixPaddingMs   int               `json:"prefix_padding_ms,omitempty"`
-	SilenceDurationMs int               `json:"silence_duration_ms,omitempty"`
+	// The type of turn detection ("server_vad" or "none").
+	Type TurnDetectionType `json:"type"`
+	// Activation threshold for VAD.
+	Threshold float64 `json:"threshold,omitempty"`
+	// Audio included before speech starts (in milliseconds).
+	PrefixPaddingMs int `json:"prefix_padding_ms,omitempty"`
+	// Duration of silence to detect speech stop (in milliseconds).
+	SilenceDurationMs int `json:"silence_duration_ms,omitempty"`
 }
 
 type ToolType string
@@ -83,8 +87,10 @@ const (
 )
 
 type InputAudioTranscription struct {
-	Enabled bool   `json:"enabled"`
-	Model   string `json:"model"`
+	// Whether input audio transcription is enabled.
+	Enabled bool `json:"enabled"`
+	// The model used for transcription.
+	Model string `json:"model"`
 }
 
 type Tool struct {
@@ -113,30 +119,45 @@ const (
 )
 
 type MessageContentPart struct {
-	Type       MessageContentType `json:"type"`
-	Text       string             `json:"text,omitempty"`
-	Audio      string             `json:"audio,omitempty"`
-	Transcript string             `json:"transcript,omitempty"`
+	// The content type.
+	Type MessageContentType `json:"type"`
+	// The text content. Validated if type is text.
+	Text string `json:"text,omitempty"`
+	// Base64-encoded audio data. Validated if type is audio.
+	Audio string `json:"audio,omitempty"`
+	// The transcript of the audio. Validated if type is transcript.
+	Transcript string `json:"transcript,omitempty"`
 }
 
 type MessageItem struct {
-	ID      string               `json:"id"`
-	Type    MessageItemType      `json:"type"`
-	Status  ItemStatus           `json:"status"`
-	Role    MessageRole          `json:"role"`
+	// The unique ID of the item.
+	ID string `json:"id"`
+	// The type of the item ("message", "function_call", "function_call_output").
+	Type MessageItemType `json:"type"`
+	// The final status of the item.
+	Status ItemStatus `json:"status"`
+	// The role associated with the item.
+	Role MessageRole `json:"role"`
+	// The content of the item.
 	Content []MessageContentPart `json:"content"`
 }
 
 type ResponseMessageItem struct {
 	MessageItem
+	// The object type, must be "realtime.item".
 	Object string `json:"object,omitempty"`
 }
 
 type Error struct {
+	// The type of error (e.g., "invalid_request_error", "server_error").
 	Message string `json:"message,omitempty"`
-	Type    string `json:"type,omitempty"`
-	Code    string `json:"code,omitempty"`
-	Param   string `json:"param,omitempty"`
+	// Error code, if any.
+	Type string `json:"type,omitempty"`
+	// A human-readable error message.
+	Code string `json:"code,omitempty"`
+	// Parameter related to the error, if any.
+	Param string `json:"param,omitempty"`
+	// The event_id of the client event that caused the error, if applicable.
 	EventID string `json:"event_id,omitempty"`
 }
 
@@ -177,20 +198,34 @@ func (m ServerToolChoice) Get() ToolChoiceInterface {
 }
 
 type ServerSession struct {
-	ID                      string                   `json:"id"`
-	Object                  string                   `json:"object"`
-	Model                   string                   `json:"model"`
-	Modalities              []Modality               `json:"modalities,omitempty"`
-	Instructions            string                   `json:"instructions,omitempty"`
-	Voice                   Voice                    `json:"voice,omitempty"`
-	InputAudioFormat        AudioFormat              `json:"input_audio_format,omitempty"`
-	OutputAudioFormat       AudioFormat              `json:"output_audio_format,omitempty"`
+	// The unique ID of the session.
+	ID string `json:"id"`
+	// The object type, must be "realtime.session".
+	Object string `json:"object"`
+	// The default model used for this session.
+	Model string `json:"model"`
+	// The set of modalities the model can respond with.
+	Modalities []Modality `json:"modalities,omitempty"`
+	// The default system instructions.
+	Instructions string `json:"instructions,omitempty"`
+	// The voice the model uses to respond - one of alloy, echo, or shimmer.
+	Voice Voice `json:"voice,omitempty"`
+	// The format of input audio.
+	InputAudioFormat AudioFormat `json:"input_audio_format,omitempty"`
+	// The format of output audio.
+	OutputAudioFormat AudioFormat `json:"output_audio_format,omitempty"`
+	// Configuration for input audio transcription.
 	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
-	TurnDetection           *TurnDetection           `json:"turn_detection,omitempty"`
-	Tools                   []Tool                   `json:"tools,omitempty"`
-	ToolChoice              ServerToolChoice         `json:"tool_choice,omitempty"`
-	Temperature             *float32                 `json:"temperature,omitempty"`
-	MaxOutputTokens         int                      `json:"max_output_tokens,omitempty"`
+	// Configuration for turn detection.
+	TurnDetection *TurnDetection `json:"turn_detection,omitempty"`
+	// Tools (functions) available to the model.
+	Tools []Tool `json:"tools,omitempty"`
+	// How the model chooses tools.
+	ToolChoice ServerToolChoice `json:"tool_choice,omitempty"`
+	// Sampling temperature.
+	Temperature *float32 `json:"temperature,omitempty"`
+	// Maximum number of output tokens.
+	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
 }
 
 type ItemStatus string
@@ -202,7 +237,9 @@ const (
 )
 
 type Conversation struct {
-	ID     string `json:"id"`
+	// The unique ID of the conversation.
+	ID string `json:"id"`
+	// The object type, must be "realtime.conversation".
 	Object string `json:"object"`
 }
 
@@ -223,17 +260,27 @@ type Usage struct {
 }
 
 type Response struct {
-	ID            string                `json:"id"`
-	Object        string                `json:"object"`
-	Status        ResponseStatus        `json:"status"`
-	StatusDetails any                   `json:"status_details,omitempty"`
-	Output        []ResponseMessageItem `json:"output"`
-	Usage         *Usage                `json:"usage,omitempty"`
+	// The unique ID of the response.
+	ID string `json:"id"`
+	// The object type, must be "realtime.response".
+	Object string `json:"object"`
+	// The status of the response.
+	Status ResponseStatus `json:"status"`
+	// Additional details about the status.
+	StatusDetails any `json:"status_details,omitempty"`
+	// The list of output items generated by the response.
+	Output []ResponseMessageItem `json:"output"`
+	// Usage statistics for the response.
+	Usage *Usage `json:"usage,omitempty"`
 }
 
 type RateLimit struct {
-	Name         string  `json:"name"`
-	Limit        int     `json:"limit"`
-	Remaining    int     `json:"remaining"`
+	// The name of the rate limit ("requests", "tokens", "input_tokens", "output_tokens").
+	Name string `json:"name"`
+	// The maximum allowed value for the rate limit.
+	Limit int `json:"limit"`
+	// The remaining value before the limit is reached.
+	Remaining int `json:"remaining"`
+	// Seconds until the rate limit resets.
 	ResetSeconds float64 `json:"reset_seconds"`
 }
