@@ -31,7 +31,7 @@ func NewClientWithConfig(config ClientConfig) *Client {
 	}
 }
 
-func (c *Client) getUrl(model string) string {
+func (c *Client) getURL(model string) string {
 	query := url.Values{}
 
 	if c.config.APIType == APITypeAzure {
@@ -110,10 +110,10 @@ func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, err
 	}
 
 	// get url by model
-	url := c.getUrl(connectOpts.model)
+	url := c.getURL(connectOpts.model)
 
 	// dial
-	conn, _, err := websocket.Dial(ctx, url, connectOpts.dialOptions)
+	conn, _, err := websocket.Dial(ctx, url, connectOpts.dialOptions) //nolint:bodyclose // resp.Body is nil
 	if err != nil {
 		return nil, err
 	}

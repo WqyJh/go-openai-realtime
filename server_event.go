@@ -369,8 +369,48 @@ type RateLimitsUpdatedEvent struct {
 	RateLimits []RateLimit `json:"rate_limits"`
 }
 
+type ServerEventInterface interface {
+	ErrorEvent |
+		SessionCreatedEvent |
+		SessionUpdatedEvent |
+		ConversationCreatedEvent |
+		InputAudioBufferCommittedEvent |
+		InputAudioBufferClearedEvent |
+		InputAudioBufferSpeechStartedEvent |
+		InputAudioBufferSpeechStoppedEvent |
+		ConversationItemCreatedEvent |
+		ConversationItemInputAudioTranscriptionCompletedEvent |
+		ConversationItemInputAudioTranscriptionFailedEvent |
+		ConversationItemTruncatedEvent |
+		ConversationItemDeletedEvent |
+		ResponseCreatedEvent |
+		ResponseDoneEvent |
+		ResponseOutputItemAddedEvent |
+		ResponseOutputItemDoneEvent |
+		ResponseContentPartAddedEvent |
+		ResponseContentPartDoneEvent |
+		ResponseTextDeltaEvent |
+		ResponseTextDoneEvent |
+		ResponseAudioTranscriptDeltaEvent |
+		ResponseAudioTranscriptDoneEvent |
+		ResponseAudioDeltaEvent |
+		ResponseAudioDoneEvent |
+		ResponseFunctionCallArgumentsDeltaEvent |
+		ResponseFunctionCallArgumentsDoneEvent |
+		RateLimitsUpdatedEvent
+}
+
+func unmarshalServerEvent[T ServerEventInterface](data []byte) (T, error) {
+	var t T
+	err := json.Unmarshal(data, &t)
+	if err != nil {
+		return t, err
+	}
+	return t, nil
+}
+
 // UnmarshalServerEvent unmarshals the server event from the given JSON data.
-func UnmarshalServerEvent(data []byte) (ServerEvent, error) {
+func UnmarshalServerEvent(data []byte) (ServerEvent, error) { //nolint:funlen,cyclop // TODO: optimize
 	var eventType struct {
 		Type ServerEventType `json:"type"`
 	}
@@ -380,117 +420,61 @@ func UnmarshalServerEvent(data []byte) (ServerEvent, error) {
 	}
 	switch eventType.Type {
 	case ServerEventTypeError:
-		var event ErrorEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ErrorEvent](data)
 	case ServerEventTypeSessionCreated:
-		var event SessionCreatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[SessionCreatedEvent](data)
 	case ServerEventTypeSessionUpdated:
-		var event SessionUpdatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[SessionUpdatedEvent](data)
 	case ServerEventTypeConversationCreated:
-		var event ConversationCreatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ConversationCreatedEvent](data)
 	case ServerEventTypeInputAudioBufferCommitted:
-		var event InputAudioBufferCommittedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[InputAudioBufferCommittedEvent](data)
 	case ServerEventTypeInputAudioBufferCleared:
-		var event InputAudioBufferClearedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[InputAudioBufferClearedEvent](data)
 	case ServerEventTypeInputAudioBufferSpeechStarted:
-		var event InputAudioBufferSpeechStartedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[InputAudioBufferSpeechStartedEvent](data)
 	case ServerEventTypeInputAudioBufferSpeechStopped:
-		var event InputAudioBufferSpeechStoppedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[InputAudioBufferSpeechStoppedEvent](data)
 	case ServerEventTypeConversationItemCreated:
-		var event ConversationItemCreatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ConversationItemCreatedEvent](data)
 	case ServerEventTypeConversationItemInputAudioTranscriptionCompleted:
-		var event ConversationItemInputAudioTranscriptionCompletedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ConversationItemInputAudioTranscriptionCompletedEvent](data)
 	case ServerEventTypeConversationItemInputAudioTranscriptionFailed:
-		var event ConversationItemInputAudioTranscriptionFailedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ConversationItemInputAudioTranscriptionFailedEvent](data)
 	case ServerEventTypeConversationItemTruncated:
-		var event ConversationItemTruncatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ConversationItemTruncatedEvent](data)
 	case ServerEventTypeConversationItemDeleted:
-		var event ConversationItemDeletedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ConversationItemDeletedEvent](data)
 	case ServerEventTypeResponseCreated:
-		var event ResponseCreatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseCreatedEvent](data)
 	case ServerEventTypeResponseDone:
-		var event ResponseDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseDoneEvent](data)
 	case ServerEventTypeResponseOutputItemAdded:
-		var event ResponseOutputItemAddedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseOutputItemAddedEvent](data)
 	case ServerEventTypeResponseOutputItemDone:
-		var event ResponseOutputItemDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseOutputItemDoneEvent](data)
 	case ServerEventTypeResponseContentPartAdded:
-		var event ResponseContentPartAddedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseContentPartAddedEvent](data)
 	case ServerEventTypeResponseContentPartDone:
-		var event ResponseContentPartDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseContentPartDoneEvent](data)
 	case ServerEventTypeResponseTextDelta:
-		var event ResponseTextDeltaEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseTextDeltaEvent](data)
 	case ServerEventTypeResponseTextDone:
-		var event ResponseTextDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseTextDoneEvent](data)
 	case ServerEventTypeResponseAudioTranscriptDelta:
-		var event ResponseAudioTranscriptDeltaEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseAudioTranscriptDeltaEvent](data)
 	case ServerEventTypeResponseAudioTranscriptDone:
-		var event ResponseAudioTranscriptDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseAudioTranscriptDoneEvent](data)
 	case ServerEventTypeResponseAudioDelta:
-		var event ResponseAudioDeltaEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseAudioDeltaEvent](data)
 	case ServerEventTypeResponseAudioDone:
-		var event ResponseAudioDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseAudioDoneEvent](data)
 	case ServerEventTypeResponseFunctionCallArgumentsDelta:
-		var event ResponseFunctionCallArgumentsDeltaEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseFunctionCallArgumentsDeltaEvent](data)
 	case ServerEventTypeResponseFunctionCallArgumentsDone:
-		var event ResponseFunctionCallArgumentsDoneEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[ResponseFunctionCallArgumentsDoneEvent](data)
 	case ServerEventTypeRateLimitsUpdated:
-		var event RateLimitsUpdatedEvent
-		err = json.Unmarshal(data, &event)
-		return event, err
+		return unmarshalServerEvent[RateLimitsUpdatedEvent](data)
 	default:
 		// This should never happen.
 		return nil, fmt.Errorf("unknown server event type: %s", eventType.Type)

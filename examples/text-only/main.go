@@ -73,7 +73,7 @@ func main() {
 		}
 		conn.SendMessage(ctx, &openairt.ConversationItemCreateEvent{
 			Item: openairt.MessageItem{
-				ID:     openairt.GenerateId("msg_", 10),
+				ID:     openairt.GenerateID("msg_", 10),
 				Status: openairt.ItemStatusCompleted,
 				Type:   openairt.MessageItemTypeMessage,
 				Role:   openairt.MessageRoleUser,

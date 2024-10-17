@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestErrorEvent(t *testing.T) {
@@ -34,9 +34,9 @@ func TestErrorEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeError, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ErrorEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeError, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ErrorEvent))
 }
 
 func TestServerToolChoice(t *testing.T) {
@@ -50,33 +50,33 @@ func TestServerToolChoice(t *testing.T) {
 	expected := openairt.ServerToolChoice{Function: expectedFunction}
 	actual := openairt.ServerToolChoice{}
 	err := json.Unmarshal([]byte(data), &actual)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
-	assert.Equal(t, expectedFunction, actual.Get())
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+	require.Equal(t, expectedFunction, actual.Get())
 
 	data = `"auto"`
 	expected = openairt.ServerToolChoice{String: openairt.ToolChoiceAuto}
 	actual = openairt.ServerToolChoice{}
 	err = json.Unmarshal([]byte(data), &actual)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
-	assert.Equal(t, openairt.ToolChoiceAuto, actual.Get())
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+	require.Equal(t, openairt.ToolChoiceAuto, actual.Get())
 
 	data = `"none"`
 	expected = openairt.ServerToolChoice{String: openairt.ToolChoiceNone}
 	actual = openairt.ServerToolChoice{}
 	err = json.Unmarshal([]byte(data), &actual)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
-	assert.Equal(t, openairt.ToolChoiceNone, actual.Get())
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+	require.Equal(t, openairt.ToolChoiceNone, actual.Get())
 
 	data = `"required"`
 	expected = openairt.ServerToolChoice{String: openairt.ToolChoiceRequired}
 	actual = openairt.ServerToolChoice{}
 	err = json.Unmarshal([]byte(data), &actual)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
-	assert.Equal(t, openairt.ToolChoiceRequired, actual.Get())
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+	require.Equal(t, openairt.ToolChoiceRequired, actual.Get())
 }
 
 func TestSessionCreatedEvent(t *testing.T) {
@@ -136,9 +136,9 @@ func TestSessionCreatedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeSessionCreated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.SessionCreatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeSessionCreated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.SessionCreatedEvent))
 }
 
 func TestSessionUpdatedEvent(t *testing.T) {
@@ -194,9 +194,9 @@ func TestSessionUpdatedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.SessionUpdatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.SessionUpdatedEvent))
 
 	data = `{
 		"event_id": "event_5678",
@@ -224,9 +224,9 @@ func TestSessionUpdatedEvent(t *testing.T) {
 	}`
 	expected.Session.MaxOutputTokens = openairt.Inf
 	actual, err = openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.SessionUpdatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeSessionUpdated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.SessionUpdatedEvent))
 }
 
 func TestConversationCreatedEvent(t *testing.T) {
@@ -249,9 +249,9 @@ func TestConversationCreatedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeConversationCreated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ConversationCreatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeConversationCreated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ConversationCreatedEvent))
 }
 
 func TestConversationItemCreatedEvent(t *testing.T) {
@@ -296,9 +296,9 @@ func TestConversationItemCreatedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeConversationItemCreated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ConversationItemCreatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeConversationItemCreated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ConversationItemCreatedEvent))
 }
 
 func TestConversationItemInputAudioTranscriptionCompletedEvent(t *testing.T) {
@@ -319,9 +319,9 @@ func TestConversationItemInputAudioTranscriptionCompletedEvent(t *testing.T) {
 		Transcript:   "Hello, how are you?",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeConversationItemInputAudioTranscriptionCompleted, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ConversationItemInputAudioTranscriptionCompletedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeConversationItemInputAudioTranscriptionCompleted, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ConversationItemInputAudioTranscriptionCompletedEvent))
 }
 
 func TestConversationItemInputAudioTranscriptionFailedEvent(t *testing.T) {
@@ -353,9 +353,9 @@ func TestConversationItemInputAudioTranscriptionFailedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeConversationItemInputAudioTranscriptionFailed, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ConversationItemInputAudioTranscriptionFailedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeConversationItemInputAudioTranscriptionFailed, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ConversationItemInputAudioTranscriptionFailedEvent))
 }
 
 func TestConversationItemTruncatedEvent(t *testing.T) {
@@ -376,9 +376,9 @@ func TestConversationItemTruncatedEvent(t *testing.T) {
 		AudioEndMs:   1500,
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeConversationItemTruncated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ConversationItemTruncatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeConversationItemTruncated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ConversationItemTruncatedEvent))
 }
 
 func TestConversationItemDeletedEvent(t *testing.T) {
@@ -395,9 +395,9 @@ func TestConversationItemDeletedEvent(t *testing.T) {
 		ItemID: "msg_005",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeConversationItemDeleted, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ConversationItemDeletedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeConversationItemDeleted, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ConversationItemDeletedEvent))
 }
 
 func TestInputAudioBufferCommittedEvent(t *testing.T) {
@@ -416,9 +416,9 @@ func TestInputAudioBufferCommittedEvent(t *testing.T) {
 		ItemID:         "msg_002",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeInputAudioBufferCommitted, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.InputAudioBufferCommittedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeInputAudioBufferCommitted, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.InputAudioBufferCommittedEvent))
 }
 
 func TestInputAudioBufferClearedEvent(t *testing.T) {
@@ -433,9 +433,9 @@ func TestInputAudioBufferClearedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeInputAudioBufferCleared, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.InputAudioBufferClearedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeInputAudioBufferCleared, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.InputAudioBufferClearedEvent))
 }
 
 func TestInputAudioBufferSpeechStartedEvent(t *testing.T) {
@@ -454,9 +454,9 @@ func TestInputAudioBufferSpeechStartedEvent(t *testing.T) {
 		ItemID:       "msg_003",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeInputAudioBufferSpeechStarted, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.InputAudioBufferSpeechStartedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeInputAudioBufferSpeechStarted, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.InputAudioBufferSpeechStartedEvent))
 }
 
 func TestInputAudioBufferSpeechStoppedEvent(t *testing.T) {
@@ -475,9 +475,9 @@ func TestInputAudioBufferSpeechStoppedEvent(t *testing.T) {
 		ItemID:     "msg_003",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeInputAudioBufferSpeechStopped, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.InputAudioBufferSpeechStoppedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeInputAudioBufferSpeechStopped, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.InputAudioBufferSpeechStoppedEvent))
 }
 
 func TestResponseCreatedEvent(t *testing.T) {
@@ -508,9 +508,9 @@ func TestResponseCreatedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseCreated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseCreatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseCreated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseCreatedEvent))
 }
 
 func TestResponseDoneEvent(t *testing.T) {
@@ -579,9 +579,9 @@ func TestResponseDoneEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseDoneEvent))
 }
 
 func TestResponseOutputItemAddedEvent(t *testing.T) {
@@ -618,9 +618,9 @@ func TestResponseOutputItemAddedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseOutputItemAdded, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseOutputItemAddedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseOutputItemAdded, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseOutputItemAddedEvent))
 }
 
 func TestResponseOutputItemDoneEvent(t *testing.T) {
@@ -667,9 +667,9 @@ func TestResponseOutputItemDoneEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseOutputItemDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseOutputItemDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseOutputItemDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseOutputItemDoneEvent))
 }
 
 func TestResponseContentPartAddedEvent(t *testing.T) {
@@ -700,9 +700,9 @@ func TestResponseContentPartAddedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseContentPartAdded, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseContentPartAddedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseContentPartAdded, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseContentPartAddedEvent))
 }
 
 func TestResponseContentPartDoneEvent(t *testing.T) {
@@ -733,9 +733,9 @@ func TestResponseContentPartDoneEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseContentPartDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseContentPartDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseContentPartDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseContentPartDoneEvent))
 }
 
 func TestResponseTextDelta(t *testing.T) {
@@ -760,9 +760,9 @@ func TestResponseTextDelta(t *testing.T) {
 		Delta:        "Sure, I can h",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseTextDelta, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseTextDeltaEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseTextDelta, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseTextDeltaEvent))
 }
 
 func TestResponseTextDoneEvent(t *testing.T) {
@@ -787,9 +787,9 @@ func TestResponseTextDoneEvent(t *testing.T) {
 		Text:         "Sure, I can help with that.",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseTextDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseTextDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseTextDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseTextDoneEvent))
 }
 
 func TestResponseAudioTranscriptDelta(t *testing.T) {
@@ -814,9 +814,9 @@ func TestResponseAudioTranscriptDelta(t *testing.T) {
 		Delta:        "Hello, how can I a",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseAudioTranscriptDelta, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseAudioTranscriptDeltaEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseAudioTranscriptDelta, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseAudioTranscriptDeltaEvent))
 }
 
 func TestResponseAudioTranscriptDoneEvent(t *testing.T) {
@@ -841,9 +841,9 @@ func TestResponseAudioTranscriptDoneEvent(t *testing.T) {
 		Transcript:   "Hello, how can I assist you today?",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseAudioTranscriptDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseAudioTranscriptDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseAudioTranscriptDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseAudioTranscriptDoneEvent))
 }
 
 func TestResponseAudioDeltaEvent(t *testing.T) {
@@ -868,9 +868,9 @@ func TestResponseAudioDeltaEvent(t *testing.T) {
 		Delta:        "Base64EncodedAudioDelta",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseAudioDelta, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseAudioDeltaEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseAudioDelta, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseAudioDeltaEvent))
 }
 
 func TestResponseAudioDoneEvent(t *testing.T) {
@@ -893,9 +893,9 @@ func TestResponseAudioDoneEvent(t *testing.T) {
 		ContentIndex: 0,
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseAudioDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseAudioDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseAudioDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseAudioDoneEvent))
 }
 
 func TestResponseFunctionCallArgumentsDelta(t *testing.T) {
@@ -920,9 +920,9 @@ func TestResponseFunctionCallArgumentsDelta(t *testing.T) {
 		Delta:       "{\"location\": \"San\"",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseFunctionCallArgumentsDelta, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseFunctionCallArgumentsDeltaEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseFunctionCallArgumentsDelta, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseFunctionCallArgumentsDeltaEvent))
 }
 
 func TestResponseFunctionCallArgumentsDoneEvent(t *testing.T) {
@@ -947,9 +947,9 @@ func TestResponseFunctionCallArgumentsDoneEvent(t *testing.T) {
 		Arguments:   "{\"location\": \"San Francisco\"}",
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeResponseFunctionCallArgumentsDone, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.ResponseFunctionCallArgumentsDoneEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeResponseFunctionCallArgumentsDone, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.ResponseFunctionCallArgumentsDoneEvent))
 }
 
 func TestRateLimitsUpdatedEvent(t *testing.T) {
@@ -992,7 +992,7 @@ func TestRateLimitsUpdatedEvent(t *testing.T) {
 		},
 	}
 	actual, err := openairt.UnmarshalServerEvent([]byte(data))
-	assert.NoError(t, err)
-	assert.Equal(t, openairt.ServerEventTypeRateLimitsUpdated, actual.ServerEventType())
-	assert.Equal(t, expected, actual.(openairt.RateLimitsUpdatedEvent))
+	require.NoError(t, err)
+	require.Equal(t, openairt.ServerEventTypeRateLimitsUpdated, actual.ServerEventType())
+	require.Equal(t, expected, actual.(openairt.RateLimitsUpdatedEvent))
 }

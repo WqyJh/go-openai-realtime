@@ -8,25 +8,25 @@ import (
 	"testing"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIntOrInfMarshalJSON(t *testing.T) {
 	v := openairt.IntOrInf(10)
-	assert.Equal(t, 10, int(v))
-	assert.False(t, v.IsInf())
+	require.Equal(t, 10, int(v))
+	require.False(t, v.IsInf())
 
 	b, err := json.Marshal(v)
-	assert.NoError(t, err)
-	assert.Equal(t, []byte("10"), b)
+	require.NoError(t, err)
+	require.Equal(t, []byte("10"), b)
 
 	v = openairt.Inf
-	assert.Equal(t, math.MaxInt, int(v))
-	assert.True(t, v.IsInf())
+	require.Equal(t, math.MaxInt, int(v))
+	require.True(t, v.IsInf())
 
 	b, err = json.Marshal(v)
-	assert.NoError(t, err)
-	assert.Equal(t, []byte("\"inf\""), b)
+	require.NoError(t, err)
+	require.Equal(t, []byte("\"inf\""), b)
 
 	type TestStruct struct {
 		MaxOutputTokens openairt.IntOrInf `json:"max_output_tokens,omitempty"`
@@ -34,15 +34,15 @@ func TestIntOrInfMarshalJSON(t *testing.T) {
 
 	s := TestStruct{}
 	b, err = json.Marshal(s)
-	assert.NoError(t, err)
-	assert.Equal(t, []byte("{}"), b)
+	require.NoError(t, err)
+	require.Equal(t, []byte("{}"), b)
 }
 
 func TestInetAton(t *testing.T) {
 	ip := "37.57.95.27"
 	ret := big.NewInt(0)
 	i := net.ParseIP(ip).To4()
-	assert.NotNil(t, i)
+	require.NotNil(t, i)
 	ret.SetBytes(i)
 	t.Log(ret.Uint64())
 }

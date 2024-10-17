@@ -7,7 +7,7 @@ import (
 	openairt "github.com/WqyJh/go-openai-realtime"
 	"github.com/sashabaranov/go-openai"
 	"github.com/sashabaranov/go-openai/jsonschema"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSessionUpdateEvent(t *testing.T) {
@@ -61,7 +61,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 
 	// data, err := json.MarshalIndent(message, "", "\t")
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{
 	"event_id": "test-id",
 	"session": {
@@ -111,11 +111,11 @@ func TestSessionUpdateEvent(t *testing.T) {
 	},
 	"type": "session.update"
 }`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.Session.MaxOutputTokens = 0
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{
 		"event_id": "test-id",
 		"session": {
@@ -164,7 +164,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 		},
 		"type": "session.update"
 	}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestSessionUpdateEventSimple(t *testing.T) {
@@ -187,7 +187,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 
 	// data, err := json.MarshalIndent(message, "", "\t")
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{
 	"session": {
 			"modalities": [
@@ -203,7 +203,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 	},
 	"type": "session.update"
 }`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestInputAudioBufferAppendEvent(t *testing.T) {
@@ -211,43 +211,43 @@ func TestInputAudioBufferAppendEvent(t *testing.T) {
 		Audio: "test-audio",
 	}
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{"audio":"test-audio","type":"input_audio_buffer.append"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","audio":"test-audio","type":"input_audio_buffer.append"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestInputAudioBufferCommitEvent(t *testing.T) {
 	message := openairt.InputAudioBufferCommitEvent{}
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{"type":"input_audio_buffer.commit"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"input_audio_buffer.commit"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestInputAudioBufferClearEvent(t *testing.T) {
 	message := openairt.InputAudioBufferClearEvent{}
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{"type":"input_audio_buffer.clear"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"input_audio_buffer.clear"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestConversationItemCreateEvent(t *testing.T) {
@@ -266,7 +266,7 @@ func TestConversationItemCreateEvent(t *testing.T) {
 		},
 	}
 	data, err := json.MarshalIndent(message, "", "\t")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{
 	"previous_item_id": "test-previous-item-id",
 	"item": {
@@ -291,11 +291,11 @@ func TestConversationItemCreateEvent(t *testing.T) {
 	},
 	"type": "conversation.item.create"
 }`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{
 	"event_id": "test-id",
 	"previous_item_id": "test-previous-item-id",
@@ -321,7 +321,7 @@ func TestConversationItemCreateEvent(t *testing.T) {
 	},
 	"type": "conversation.item.create"
 }`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestConversationItemTruncateEvent(t *testing.T) {
@@ -331,30 +331,30 @@ func TestConversationItemTruncateEvent(t *testing.T) {
 		AudioEndMs:   2000,
 	}
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{"item_id":"test-item-id","content_index":1,"audio_end_ms":2000,"type":"conversation.item.truncate"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","item_id":"test-item-id","content_index":1,"audio_end_ms":2000,"type":"conversation.item.truncate"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 func TestConversationItemDeleteEvent(t *testing.T) {
 	message := openairt.ConversationItemDeleteEvent{
 		ItemID: "test-item-id",
 	}
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{"item_id":"test-item-id","type":"conversation.item.delete"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","item_id":"test-item-id","type":"conversation.item.delete"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestResponseCreateEvent(t *testing.T) {
@@ -371,7 +371,7 @@ func TestResponseCreateEvent(t *testing.T) {
 		},
 	}
 	data, err := json.MarshalIndent(message, "", "\t")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{
 	"response": {
 		"modalities": [
@@ -386,26 +386,26 @@ func TestResponseCreateEvent(t *testing.T) {
 	},
 	"type": "response.create"
 }`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	message.Response.MaxOutputTokens = openairt.Inf
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711-ulaw","tool_choice":"auto","max_output_tokens":"inf"},"type":"response.create"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }
 
 func TestResponseCancelEvent(t *testing.T) {
 	message := openairt.ResponseCancelEvent{}
 	data, err := json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected := `{"type":"response.cancel"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"response.cancel"}`
-	assert.JSONEq(t, expected, string(data))
+	require.JSONEq(t, expected, string(data))
 }

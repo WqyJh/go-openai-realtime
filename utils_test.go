@@ -5,21 +5,21 @@ import (
 	"testing"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestGenerateId(t *testing.T) {
-	generated := openairt.GenerateId("test_", 10)
+func TestGenerateID(t *testing.T) {
+	generated := openairt.GenerateID("test_", 10)
 	t.Logf("generated: %s", generated)
-	assert.True(t, strings.HasPrefix(generated, "test_"))
-	assert.Equal(t, 10, len(generated))
+	require.True(t, strings.HasPrefix(generated, "test_"))
+	require.Len(t, generated, 10)
 
-	generated = openairt.GenerateId("test_", 20)
+	generated = openairt.GenerateID("test_", 20)
 	t.Logf("generated: %s", generated)
-	assert.True(t, strings.HasPrefix(generated, "test_"))
-	assert.Equal(t, 20, len(generated))
+	require.True(t, strings.HasPrefix(generated, "test_"))
+	require.Len(t, generated, 20)
 
-	generated = openairt.GenerateId("test_", 5)
+	generated = openairt.GenerateID("test_", 5)
 	t.Logf("generated: %s", generated)
-	assert.Equal(t, "test_", generated)
+	require.Equal(t, "test_", generated)
 }

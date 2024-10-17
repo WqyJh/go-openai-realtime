@@ -1,36 +1,36 @@
-package openairt
+package openairt //nolint:testpackage // Need to access unexported fields
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestClient(t *testing.T) {
 	mockToken := "test"
 	client := NewClient(mockToken)
-	assert.Equal(t, client.config.authToken, mockToken)
+	require.Equal(t, client.config.authToken, mockToken)
 
 	config := DefaultConfig(mockToken)
 	client = NewClientWithConfig(config)
-	assert.Equal(t, client.config.authToken, mockToken)
-	assert.Equal(t, client.config.BaseURL, openaiAPIURLv1)
-	assert.Equal(t, client.config.APIType, APITypeOpenAI)
-	url := client.getUrl("test-model")
-	assert.Equal(t, url, openaiAPIURLv1+"?model=test-model")
+	require.Equal(t, mockToken, client.config.authToken)
+	require.Equal(t, openaiAPIURLv1, client.config.BaseURL)
+	require.Equal(t, APITypeOpenAI, client.config.APIType)
+	url := client.getURL("test-model")
+	require.Equal(t, openaiAPIURLv1+"?model=test-model", url)
 	headers := client.getHeaders()
-	assert.Equal(t, headers.Get("Authorization"), "Bearer "+mockToken)
-	assert.Equal(t, headers.Get("OpenAI-Beta"), "realtime=v1")
+	require.Equal(t, "Bearer "+mockToken, headers.Get("Authorization"))
+	require.Equal(t, "realtime=v1", headers.Get("OpenAI-Beta"))
 
-	azureUrl := "wss://my-eastus2-openai-resource.openai.azure.com/openai/realtime"
-	config = DefaultAzureConfig(mockToken, azureUrl)
+	azureURL := "wss://my-eastus2-openai-resource.openai.azure.com/openai/realtime"
+	config = DefaultAzureConfig(mockToken, azureURL)
 	client = NewClientWithConfig(config)
-	assert.Equal(t, client.config.authToken, mockToken)
-	assert.Equal(t, client.config.BaseURL, azureUrl)
-	assert.Equal(t, client.config.APIType, APITypeAzure)
-	assert.Equal(t, client.config.APIVersion, azureAPIVersion20241001Preview)
-	url = client.getUrl("test-model")
-	assert.Equal(t, url, azureUrl+"?api-version="+azureAPIVersion20241001Preview+"&deployment=test-model")
+	require.Equal(t, mockToken, client.config.authToken)
+	require.Equal(t, azureURL, client.config.BaseURL)
+	require.Equal(t, APITypeAzure, client.config.APIType)
+	require.Equal(t, azureAPIVersion20241001Preview, client.config.APIVersion)
+	url = client.getURL("test-model")
+	require.Equal(t, azureURL+"?api-version="+azureAPIVersion20241001Preview+"&deployment=test-model", url)
 	headers = client.getHeaders()
-	assert.Equal(t, headers.Get("api-key"), mockToken)
+	require.Equal(t, mockToken, headers.Get("api-key"))
 }

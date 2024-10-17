@@ -5,9 +5,9 @@ import (
 	"math/big"
 )
 
-// GenerateId generates a random ID with a prefix and a specified length.
+// GenerateID generates a random ID with a prefix and a specified length.
 // The length of the returned ID is equal to the length parameter, therefore the prefix must be shorter than the length.
-func GenerateId(prefix string, length int) string {
+func GenerateID(prefix string, length int) string {
 	const chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 	if length <= len(prefix) {
 		return prefix

@@ -79,11 +79,11 @@ func (c *ConnHandler) Start() {
 	}()
 }
 
-func (c *ConnHandler) run() error {
+func (c *ConnHandler) run() {
 	for {
 		select {
 		case <-c.ctx.Done():
-			return nil
+			return
 		default:
 		}
 
