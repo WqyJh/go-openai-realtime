@@ -1,10 +1,14 @@
-# go-openai-realtime
+# OpenAI Realtime API SDK for Golang
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/WqyJh/go-openai-realtime.svg)](https://pkg.go.dev/github.com/WqyJh/go-openai-realtime)
 [![Go Report Card](https://goreportcard.com/badge/github.com/WqyJh/go-openai-realtime)](https://goreportcard.com/report/github.com/WqyJh/go-openai-realtime)
 [![codecov](https://codecov.io/gh/WqyJh/go-openai-realtime/branch/main/graph/badge.svg?token=bCbIfHLIsW)](https://codecov.io/gh/WqyJh/go-openai-realtime)
 
 This library provides unofficial Go clients for [OpenAI Realtime API](https://platform.openai.com/docs/api-reference/realtime). We support all 9 client events and 28 server events.
+
+[Model Support](https://platform.openai.com/docs/models/gpt-4o-realtime):
+- gpt-4o-realtime-preview
+- gpt-4o-realtime-preview-2024-10-01
 
 ## Installation
 
@@ -92,5 +96,3 @@ func main() {
 - [Text-To-Text Example](./examples/text-only/README.md)
 - [Text-To-Voice Example](./examples/voice/text-voice/README.md)
 - [Voice-To-Voice Example](./examples/voice/voice-voice/README.md)
-
-
