@@ -14,7 +14,7 @@ import (
 )
 
 func TestWebSocket(t *testing.T) {
-	s := test.NewTestServer(t, time.Millisecond)
+	s := test.NewServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{})
@@ -56,7 +56,7 @@ func TestWebSocket(t *testing.T) {
 }
 
 func TestWebSocketReadLimitError(t *testing.T) {
-	s := test.NewTestServer(t, time.Millisecond)
+	s := test.NewServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{
@@ -82,7 +82,7 @@ func TestWebSocketReadLimitError(t *testing.T) {
 }
 
 func TestWebSocketReadLimitOK(t *testing.T) {
-	s := test.NewTestServer(t, time.Millisecond)
+	s := test.NewServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{
@@ -107,7 +107,7 @@ func TestWebSocketReadLimitOK(t *testing.T) {
 }
 
 func TestWebSocketDialOptions(t *testing.T) {
-	s := test.NewTestServer(t, time.Millisecond)
+	s := test.NewServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{
