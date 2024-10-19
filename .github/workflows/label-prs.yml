@@ -10,5 +10,9 @@ jobs:
 
     steps:
       - uses: srvaroa/labeler@master
+        with:
+          config_path: .github/labeler.yml
+          use_local_config: false
+          fail_on_error: false
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
