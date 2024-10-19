@@ -62,10 +62,9 @@ func TestConnect(t *testing.T) {
 		},
 	}
 
-	conn, err := client.Connect(context.Background(), openairt.WithModel(model), openairt.WithDialer(dialer))
+	conn, err := client.Connect(context.Background(), openairt.WithModel(model), openairt.WithDialer(dialer), openairt.WithLogger(openairt.StdLogger{}))
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 	require.True(t, dialCalled)
-
 	require.False(t, readMessageCalled)
 }

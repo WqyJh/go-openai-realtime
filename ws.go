@@ -60,6 +60,5 @@ type WebSocketDialer interface {
 
 // DefaultDialer returns a default WebSocketDialer.
 func DefaultDialer() WebSocketDialer {
-	// return NewWsCoderWebSocketDialer(WsCoderWebSocketOptions{})
-	return NewGorillaWebSocketDialer(GorillaWebSocketOptions{})
+	return NewCoderWebSocketDialer(CoderWebSocketOptions{})
 }

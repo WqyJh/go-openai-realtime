@@ -1,4 +1,4 @@
-package openairt_test
+package gorilla_test
 
 import (
 	"context"
@@ -7,15 +7,17 @@ import (
 	"time"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
+	gorilla "github.com/WqyJh/go-openai-realtime/contrib/ws-gorilla"
+	test "github.com/WqyJh/go-openai-realtime/test"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGorillaWebSocket(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := openairt.NewGorillaWebSocketDialer(openairt.GorillaWebSocketOptions{})
+	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{})
 
 	conn, err := dialer.Dial(context.Background(), s.URL, nil)
 	require.NoError(t, err)
@@ -54,10 +56,10 @@ func TestGorillaWebSocket(t *testing.T) {
 }
 
 func TestGorillaWebSocketReadLimitError(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := openairt.NewGorillaWebSocketDialer(openairt.GorillaWebSocketOptions{
+	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{
 		ReadLimit: 5,
 	})
 
@@ -80,10 +82,10 @@ func TestGorillaWebSocketReadLimitError(t *testing.T) {
 }
 
 func TestGorillaWebSocketReadLimitOK(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := openairt.NewGorillaWebSocketDialer(openairt.GorillaWebSocketOptions{
+	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{
 		ReadLimit: 11,
 	})
 
@@ -105,10 +107,10 @@ func TestGorillaWebSocketReadLimitOK(t *testing.T) {
 }
 
 func TestGorillaWebSocketDialOptions(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := openairt.NewGorillaWebSocketDialer(openairt.GorillaWebSocketOptions{
+	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{
 		Dialer: &websocket.Dialer{},
 	})
 

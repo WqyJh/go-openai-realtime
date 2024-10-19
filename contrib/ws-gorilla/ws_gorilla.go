@@ -1,10 +1,11 @@
-package openairt
+package gorilla
 
 import (
 	"context"
 	"io"
 	"net/http"
 
+	openairt "github.com/WqyJh/go-openai-realtime"
 	"github.com/gorilla/websocket"
 )
 
@@ -26,7 +27,7 @@ func NewGorillaWebSocketDialer(options GorillaWebSocketOptions) *GorillaWebSocke
 	}
 }
 
-func (d *GorillaWebSocketDialer) Dial(ctx context.Context, url string, header http.Header) (WebSocketConn, error) {
+func (d *GorillaWebSocketDialer) Dial(ctx context.Context, url string, header http.Header) (openairt.WebSocketConn, error) {
 	conn, resp, err := d.options.Dialer.DialContext(ctx, url, header)
 	if err != nil {
 		return nil, err
@@ -47,7 +48,7 @@ type GorillaWebSocketConn struct {
 	options GorillaWebSocketOptions
 }
 
-func (c *GorillaWebSocketConn) ReadMessage(ctx context.Context) (MessageType, []byte, error) {
+func (c *GorillaWebSocketConn) ReadMessage(ctx context.Context) (openairt.MessageType, []byte, error) {
 	deadline, ok := ctx.Deadline()
 	if ok {
 		c.conn.SetReadDeadline(deadline)
@@ -58,7 +59,7 @@ func (c *GorillaWebSocketConn) ReadMessage(ctx context.Context) (MessageType, []
 	messageType, r, err := c.conn.NextReader()
 	if err != nil {
 		// The returned error is Permanent, the future read operations on the same connection will not succeed.
-		return 0, nil, Permanent(err)
+		return 0, nil, openairt.Permanent(err)
 	}
 
 	data, err := io.ReadAll(r)
@@ -68,27 +69,27 @@ func (c *GorillaWebSocketConn) ReadMessage(ctx context.Context) (MessageType, []
 
 	switch messageType {
 	case websocket.TextMessage:
-		return MessageText, data, nil
+		return openairt.MessageText, data, nil
 	case websocket.BinaryMessage:
-		return MessageBinary, data, nil
+		return openairt.MessageBinary, data, nil
 	default:
-		return 0, nil, ErrUnsupportedMessageType
+		return 0, nil, openairt.ErrUnsupportedMessageType
 	}
 }
 
-func (c *GorillaWebSocketConn) WriteMessage(ctx context.Context, messageType MessageType, data []byte) error {
+func (c *GorillaWebSocketConn) WriteMessage(ctx context.Context, messageType openairt.MessageType, data []byte) error {
 	deadline, ok := ctx.Deadline()
 	if ok {
 		c.conn.SetWriteDeadline(deadline)
 	}
 
 	switch messageType {
-	case MessageText:
-		return Permanent(c.conn.WriteMessage(websocket.TextMessage, data))
-	case MessageBinary:
-		return Permanent(c.conn.WriteMessage(websocket.BinaryMessage, data))
+	case openairt.MessageText:
+		return openairt.Permanent(c.conn.WriteMessage(websocket.TextMessage, data))
+	case openairt.MessageBinary:
+		return openairt.Permanent(c.conn.WriteMessage(websocket.BinaryMessage, data))
 	default:
-		return ErrUnsupportedMessageType
+		return openairt.ErrUnsupportedMessageType
 	}
 }
 

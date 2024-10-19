@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/coder/websocket v1.8.12
-	github.com/gorilla/websocket v1.5.3
 	github.com/sashabaranov/go-openai v1.32.0
 	github.com/stretchr/testify v1.9.0
 )

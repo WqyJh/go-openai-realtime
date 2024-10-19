@@ -9,12 +9,13 @@ import (
 	"time"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
+	test "github.com/WqyJh/go-openai-realtime/test"
 	"github.com/coder/websocket"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCoderWebSocket(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := openairt.NewCoderWebSocketDialer(openairt.CoderWebSocketOptions{})
@@ -57,7 +58,7 @@ func TestCoderWebSocket(t *testing.T) {
 }
 
 func TestCoderWebSocketReadLimitError(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := openairt.NewCoderWebSocketDialer(openairt.CoderWebSocketOptions{
@@ -83,7 +84,7 @@ func TestCoderWebSocketReadLimitError(t *testing.T) {
 }
 
 func TestCoderWebSocketReadLimitOK(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := openairt.NewCoderWebSocketDialer(openairt.CoderWebSocketOptions{
@@ -108,7 +109,7 @@ func TestCoderWebSocketReadLimitOK(t *testing.T) {
 }
 
 func TestCoderWebSocketDialOptions(t *testing.T) {
-	s := NewTestServer(t, time.Millisecond)
+	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
 	dialer := openairt.NewCoderWebSocketDialer(openairt.CoderWebSocketOptions{

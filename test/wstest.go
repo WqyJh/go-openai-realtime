@@ -1,4 +1,4 @@
-package openairt_test
+package test
 
 import (
 	"context"
