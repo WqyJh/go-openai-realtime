@@ -1,3 +1,5 @@
+github.com/WqyJh/go-openai-realtime v0.2.0-alpha h1:nnaFuF7qNSjkRBAoz7aso2fIGebajyM5ER6e1MbZxbc=
+github.com/WqyJh/go-openai-realtime v0.2.0-alpha/go.mod h1:nmUYODacQuObuh0DFSEIDfJM9L4ZFDRU/OEGYMryt60=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=
 github.com/coder/websocket v1.8.12/go.mod h1:LNVeNrXQZfe5qhS9ALED3uA+l5pPqvwXg3CKoDBB2gs=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
