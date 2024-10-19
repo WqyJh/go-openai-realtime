@@ -11,11 +11,12 @@ type Logger interface {
 type NopLogger struct{}
 
 // Errorf does nothing.
-func (l NopLogger) Errorf(format string, v ...any) {}
+func (l NopLogger) Errorf(_ string, _ ...any) {}
 
 // Warnf does nothing.
-func (l NopLogger) Warnf(format string, v ...any) {}
+func (l NopLogger) Warnf(_ string, _ ...any) {}
 
+// StdLogger is a logger that logs to the "log" package.
 type StdLogger struct{}
 
 func (l StdLogger) Errorf(format string, v ...any) {

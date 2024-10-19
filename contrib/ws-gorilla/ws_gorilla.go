@@ -9,49 +9,55 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type GorillaWebSocketOptions struct {
+type WebSocketOptions struct {
 	ReadLimit int64
 	Dialer    *websocket.Dialer
 }
 
-type GorillaWebSocketDialer struct {
-	options GorillaWebSocketOptions
+type WebSocketDialer struct {
+	options WebSocketOptions
 }
 
-func NewGorillaWebSocketDialer(options GorillaWebSocketOptions) *GorillaWebSocketDialer {
+func NewWebSocketDialer(options WebSocketOptions) *WebSocketDialer {
 	if options.Dialer == nil {
 		options.Dialer = websocket.DefaultDialer
 	}
-	return &GorillaWebSocketDialer{
+	return &WebSocketDialer{
 		options: options,
 	}
 }
 
-func (d *GorillaWebSocketDialer) Dial(ctx context.Context, url string, header http.Header) (openairt.WebSocketConn, error) {
+func (d *WebSocketDialer) Dial(ctx context.Context, url string, header http.Header) (openairt.WebSocketConn, error) {
 	conn, resp, err := d.options.Dialer.DialContext(ctx, url, header)
+	if resp != nil && resp.Body != nil {
+		// The resp.Body is no longer needed after the dial succeeds.
+		// When dial fails, the resp.Body contains the original body of the response,
+		// which we don't need now.
+		_ = resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}
 
 	conn.SetReadLimit(d.options.ReadLimit)
 
-	return &GorillaWebSocketConn{
+	return &WebSocketConn{
 		conn:    conn,
 		resp:    resp,
 		options: d.options,
 	}, nil
 }
 
-type GorillaWebSocketConn struct {
+type WebSocketConn struct {
 	conn    *websocket.Conn
 	resp    *http.Response
-	options GorillaWebSocketOptions
+	options WebSocketOptions
 }
 
-func (c *GorillaWebSocketConn) ReadMessage(ctx context.Context) (openairt.MessageType, []byte, error) {
+func (c *WebSocketConn) ReadMessage(ctx context.Context) (openairt.MessageType, []byte, error) {
 	deadline, ok := ctx.Deadline()
 	if ok {
-		c.conn.SetReadDeadline(deadline)
+		_ = c.conn.SetReadDeadline(deadline)
 	}
 
 	// NextReader would block until the message is read or the connection is closed.
@@ -77,10 +83,10 @@ func (c *GorillaWebSocketConn) ReadMessage(ctx context.Context) (openairt.Messag
 	}
 }
 
-func (c *GorillaWebSocketConn) WriteMessage(ctx context.Context, messageType openairt.MessageType, data []byte) error {
+func (c *WebSocketConn) WriteMessage(ctx context.Context, messageType openairt.MessageType, data []byte) error {
 	deadline, ok := ctx.Deadline()
 	if ok {
-		c.conn.SetWriteDeadline(deadline)
+		_ = c.conn.SetWriteDeadline(deadline)
 	}
 
 	switch messageType {
@@ -93,10 +99,10 @@ func (c *GorillaWebSocketConn) WriteMessage(ctx context.Context, messageType ope
 	}
 }
 
-func (c *GorillaWebSocketConn) Close() error {
+func (c *WebSocketConn) Close() error {
 	return c.conn.Close()
 }
 
-func (c *GorillaWebSocketConn) Response() *http.Response {
+func (c *WebSocketConn) Response() *http.Response {
 	return c.resp
 }

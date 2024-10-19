@@ -13,11 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGorillaWebSocket(t *testing.T) {
+func TestWebSocket(t *testing.T) {
 	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{})
+	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{})
 
 	conn, err := dialer.Dial(context.Background(), s.URL, nil)
 	require.NoError(t, err)
@@ -55,11 +55,11 @@ func TestGorillaWebSocket(t *testing.T) {
 	require.ErrorContains(t, permanent.Err, "i/o timeout")
 }
 
-func TestGorillaWebSocketReadLimitError(t *testing.T) {
+func TestWebSocketReadLimitError(t *testing.T) {
 	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{
+	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{
 		ReadLimit: 5,
 	})
 
@@ -81,11 +81,11 @@ func TestGorillaWebSocketReadLimitError(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestGorillaWebSocketReadLimitOK(t *testing.T) {
+func TestWebSocketReadLimitOK(t *testing.T) {
 	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{
+	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{
 		ReadLimit: 11,
 	})
 
@@ -106,11 +106,11 @@ func TestGorillaWebSocketReadLimitOK(t *testing.T) {
 	require.Equal(t, []byte("hello world"), data)
 }
 
-func TestGorillaWebSocketDialOptions(t *testing.T) {
+func TestWebSocketDialOptions(t *testing.T) {
 	s := test.NewTestServer(t, time.Millisecond)
 	defer s.Server.Close()
 
-	dialer := gorilla.NewGorillaWebSocketDialer(gorilla.GorillaWebSocketOptions{
+	dialer := gorilla.NewWebSocketDialer(gorilla.WebSocketOptions{
 		Dialer: &websocket.Dialer{},
 	})
 

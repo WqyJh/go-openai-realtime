@@ -13,7 +13,7 @@ func TestPermanent(t *testing.T) {
 	err := openairt.Permanent(original)
 	require.ErrorIs(t, err, original)
 	var permanent *openairt.PermanentError
-	require.True(t, errors.As(err, &permanent))
+	require.ErrorAs(t, err, &permanent)
 	require.ErrorIs(t, permanent.Err, original)
 	require.EqualError(t, err, original.Error())
 }

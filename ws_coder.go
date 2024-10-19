@@ -53,6 +53,12 @@ func (d *CoderWebSocketDialer) Dial(ctx context.Context, url string, header http
 	}
 
 	conn, resp, err := websocket.Dial(ctx, url, d.options.DialOptions)
+	if resp != nil && resp.Body != nil {
+		// The resp.Body is no longer needed after the dial succeeds.
+		// When dial fails, the resp.Body contains the original body of the response,
+		// which we don't need now.
+		_ = resp.Body.Close()
+	}
 	if err != nil {
 		return nil, err
 	}

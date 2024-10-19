@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -24,7 +25,6 @@ type echoServer struct {
 }
 
 func (s echoServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	for k, v := range r.Header {
 		if strings.HasPrefix(k, "X-") {
 			for _, v := range v {
@@ -38,7 +38,12 @@ func (s echoServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.logf("%v", err)
 		return
 	}
-	defer c.CloseNow()
+	defer func() {
+		err2 := c.CloseNow()
+		if err2 != nil {
+			s.logf("failed to close connection: %v", err2)
+		}
+	}()
 
 	for {
 		err = echo(r.Context(), c, s.interval)
@@ -52,11 +57,15 @@ func (s echoServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+const (
+	readTimeout = time.Second * 10
+)
+
 // echo reads from the WebSocket connection and then writes
 // the received message back to it.
 // The entire function has 10s to complete.
 func echo(ctx context.Context, c *websocket.Conn, interval time.Duration) error {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	ctx, cancel := context.WithTimeout(ctx, readTimeout)
 	defer cancel()
 
 	typ, r, err := c.Reader(ctx)
@@ -80,15 +89,15 @@ func echo(ctx context.Context, c *websocket.Conn, interval time.Duration) error 
 	return err
 }
 
-type testServer struct {
+type Server struct {
 	URL    string
 	Server *httptest.Server
 }
 
-func NewTestServer(t *testing.T, interval time.Duration) testServer {
-	var testServer testServer
+func NewServer(_ *testing.T, interval time.Duration) Server {
+	var testServer Server
 	testServer.Server = httptest.NewServer(echoServer{logf: func(f string, v ...interface{}) {
-		// fmt.Printf("[test server] "+f, v...)
+		log.Printf("[test server] "+f, v...)
 	}, interval: interval})
 	testServer.URL = makeWsProto(testServer.Server.URL)
 	return testServer
