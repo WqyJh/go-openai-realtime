@@ -2,23 +2,21 @@ package openairt
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
-	"sync"
-
-	"github.com/coder/websocket"
 )
 
 type ServerEventHandler func(ctx context.Context, event ServerEvent)
 
 // Conn is a connection to the OpenAI Realtime API.
 type Conn struct {
-	conn *websocket.Conn
+	logger Logger
+	conn   WebSocketConn
 }
 
 // Close closes the connection.
 func (c *Conn) Close() error {
-	return c.conn.Close(websocket.StatusNormalClosure, "")
+	return c.conn.Close()
 }
 
 // SendMessage sends a client event to the server.
@@ -27,16 +25,16 @@ func (c *Conn) SendMessage(ctx context.Context, msg ClientEvent) error {
 	if err != nil {
 		return err
 	}
-	return c.conn.Write(ctx, websocket.MessageText, data)
+	return c.conn.WriteMessage(ctx, MessageText, data)
 }
 
 // ReadMessage reads a server event from the server.
 func (c *Conn) ReadMessage(ctx context.Context) (ServerEvent, error) {
-	messageType, data, err := c.conn.Read(ctx)
+	messageType, data, err := c.conn.ReadMessage(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if messageType != websocket.MessageText {
+	if messageType != MessageText {
 		return nil, fmt.Errorf("expected text message, got %d", messageType)
 	}
 	event, err := UnmarshalServerEvent(data)
@@ -55,51 +53,57 @@ type ConnHandler struct {
 	ctx      context.Context
 	conn     *Conn
 	handlers []ServerEventHandler
-	cancel   context.CancelFunc
-	wg       sync.WaitGroup
+	errCh    chan error
 }
 
 // NewConnHandler creates a new ConnHandler with the given context and connection.
 func NewConnHandler(ctx context.Context, conn *Conn, handlers ...ServerEventHandler) *ConnHandler {
-	ctx, cancel := context.WithCancel(ctx)
 	return &ConnHandler{
 		ctx:      ctx,
 		conn:     conn,
 		handlers: handlers,
-		cancel:   cancel,
+		errCh:    make(chan error, 1),
 	}
 }
 
 // Start starts the ConnHandler.
 func (c *ConnHandler) Start() {
-	c.wg.Add(1)
 	go func() {
-		defer c.wg.Done()
-		c.run()
+		err := c.run()
+		if err != nil {
+			c.errCh <- err
+		}
+		close(c.errCh)
 	}()
 }
 
-func (c *ConnHandler) run() {
+// Err returns a channel that receives errors from the ConnHandler.
+// This could be used to wait for the goroutine to exit.
+// If you don't need to wait for the goroutine to exit, there's no need to call this.
+// This must be called after the connection is closed, otherwise it will block indefinitely.
+func (c *ConnHandler) Err() <-chan error {
+	return c.errCh
+}
+
+func (c *ConnHandler) run() error {
 	for {
 		select {
 		case <-c.ctx.Done():
-			return
+			return c.ctx.Err()
 		default:
 		}
 
 		msg, err := c.conn.ReadMessage(c.ctx)
 		if err != nil {
-			log.Printf("ReadMessage: %v", err)
+			var permanent *PermanentError
+			if errors.As(err, &permanent) {
+				return permanent.Err
+			}
+			c.conn.logger.Warnf("read message temporary error: %+v", err)
 			continue
 		}
 		for _, handler := range c.handlers {
 			handler(c.ctx, msg)
 		}
 	}
-}
-
-// Stop stops the ConnHandler.
-func (c *ConnHandler) Stop() {
-	c.cancel()
-	c.wg.Wait()
 }

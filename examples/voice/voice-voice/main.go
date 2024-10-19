@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"time"
 
@@ -22,22 +20,10 @@ import (
 )
 
 func main() {
-
-	socksProxy := os.Getenv("SOCKS_PROXY")
-	if socksProxy != "" {
-		proxyURL, err := url.Parse(socksProxy)
-		if err != nil {
-			log.Fatal(err)
-		}
-		http.DefaultTransport = &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
-		}
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	client := openairt.NewClient(os.Getenv("OPENAI_API_KEY"))
-	conn, err := client.Connect(ctx, openairt.WithReadLimit(32768*2))
+	conn, err := client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,7 +127,6 @@ func main() {
 
 	connHandler := openairt.NewConnHandler(ctx, conn, logHandler, responseHandler, responseDeltaHandler, audioResponseHandler)
 	connHandler.Start()
-	defer connHandler.Stop()
 
 	err = conn.SendMessage(ctx, openairt.SessionUpdateEvent{
 		Session: openairt.ClientSession{

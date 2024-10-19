@@ -11,8 +11,8 @@ const (
 )
 
 const (
-	// openaiAPIURLv1 is the base URL for the OpenAI Realtime API.
-	openaiAPIURLv1 = "wss://api.openai.com/v1/realtime"
+	// OpenaiRealtimeAPIURLv1 is the base URL for the OpenAI Realtime API.
+	OpenaiRealtimeAPIURLv1 = "wss://api.openai.com/v1/realtime"
 )
 
 const (
@@ -34,7 +34,7 @@ type ClientConfig struct {
 func DefaultConfig(authToken string) ClientConfig {
 	return ClientConfig{
 		authToken: authToken,
-		BaseURL:   openaiAPIURLv1,
+		BaseURL:   OpenaiRealtimeAPIURLv1,
 		APIType:   APITypeOpenAI,
 	}
 }

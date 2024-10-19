@@ -5,33 +5,19 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 
 	openairt "github.com/WqyJh/go-openai-realtime"
 )
 
 func main() {
-	socksProxy := os.Getenv("SOCKS_PROXY")
-	if socksProxy != "" {
-		proxyURL, err := url.Parse(socksProxy)
-		if err != nil {
-			log.Fatal(err)
-		}
-		http.DefaultTransport = &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
-		}
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	client := openairt.NewClient(os.Getenv("OPENAI_API_KEY"))
-	conn, err := client.Connect(ctx)
+	conn, err := client.Connect(ctx, openairt.WithLogger(openairt.StdLogger{}))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
 
 	// Teletype response
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
@@ -52,7 +38,6 @@ func main() {
 
 	connHandler := openairt.NewConnHandler(ctx, conn, responseDeltaHandler, responseHandler)
 	connHandler.Start()
-	defer connHandler.Stop()
 
 	err = conn.SendMessage(ctx, &openairt.SessionUpdateEvent{
 		Session: openairt.ClientSession{
@@ -91,5 +76,10 @@ func main() {
 				MaxOutputTokens: 4000,
 			},
 		})
+	}
+	conn.Close()
+	err = <-connHandler.Err()
+	if err != nil {
+		log.Printf("connection error: %v", err)
 	}
 }

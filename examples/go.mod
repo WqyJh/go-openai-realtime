@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/coder/websocket v1.8.12 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hajimehoshi/oto v0.7.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8 // indirect

@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-
-	"github.com/coder/websocket"
 )
 
 const (
@@ -57,9 +55,9 @@ func (c *Client) getHeaders() http.Header {
 }
 
 type connectOption struct {
-	model       string
-	dialOptions *websocket.DialOptions
-	readLimit   int64
+	model  string
+	dialer WebSocketDialer
+	logger Logger
 }
 
 type ConnectOption func(*connectOption)
@@ -71,56 +69,44 @@ func WithModel(model string) ConnectOption {
 	}
 }
 
-// WithDialOptions sets the dial options for the connection.
-func WithDialOptions(dialOptions *websocket.DialOptions) ConnectOption {
+// WithDialer sets the dialer for the connection.
+func WithDialer(dialer WebSocketDialer) ConnectOption {
 	return func(opts *connectOption) {
-		opts.dialOptions = dialOptions
+		opts.dialer = dialer
 	}
 }
 
-// WithReadLimit sets the read limit for the connection.
-func WithReadLimit(limit int64) ConnectOption {
+// WithLogger sets the logger for the connection.
+func WithLogger(logger Logger) ConnectOption {
 	return func(opts *connectOption) {
-		opts.readLimit = limit
+		opts.logger = logger
 	}
 }
 
 // Connect connects to the OpenAI Realtime API.
 func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, error) {
 	connectOpts := connectOption{
-		model: GPT4oRealtimePreview,
+		model:  GPT4oRealtimePreview,
+		logger: NopLogger{},
 	}
 	for _, opt := range opts {
 		opt(&connectOpts)
+	}
+	if connectOpts.dialer == nil {
+		connectOpts.dialer = DefaultDialer()
 	}
 
 	// default headers
 	headers := c.getHeaders()
 
-	// dialOptions
-	if connectOpts.dialOptions != nil {
-		for k, v := range connectOpts.dialOptions.HTTPHeader {
-			headers[k] = append(headers[k], v...)
-		}
-		connectOpts.dialOptions.HTTPHeader = headers
-	} else {
-		connectOpts.dialOptions = &websocket.DialOptions{
-			HTTPHeader: headers,
-		}
-	}
-
 	// get url by model
 	url := c.getURL(connectOpts.model)
 
 	// dial
-	conn, _, err := websocket.Dial(ctx, url, connectOpts.dialOptions) //nolint:bodyclose // resp.Body is nil
+	conn, err := connectOpts.dialer.Dial(ctx, url, headers)
 	if err != nil {
 		return nil, err
 	}
 
-	// set readLimit
-	if connectOpts.readLimit > 0 {
-		conn.SetReadLimit(connectOpts.readLimit)
-	}
-	return &Conn{conn: conn}, nil
+	return &Conn{conn: conn, logger: connectOpts.logger}, nil
 }

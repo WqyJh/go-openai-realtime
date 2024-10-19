@@ -6,7 +6,7 @@ This is a simple example that demonstrates how to use the go-openai-realtime lib
 
 ```bash
 export OPENAI_API_KEY=<your openai api key>
-export SOCKS_PROXY=<your socks proxy> # this optional
+export HTTP_PROXY=<your socks proxy> # this optional
 go run .
 ```
 
