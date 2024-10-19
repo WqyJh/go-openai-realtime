@@ -2,17 +2,13 @@ package openairt
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net/http"
 
 	"github.com/coder/websocket"
 )
 
-var (
-	ErrUnsupportedMessageType = errors.New("unsupported message type")
-)
-
+// CoderWebSocketOptions is the options for CoderWebSocketConn.
 type CoderWebSocketOptions struct {
 	// ReadLimit is the maximum size of a message in bytes. -1 means no limit. Default is -1.
 	ReadLimit int64
@@ -20,10 +16,12 @@ type CoderWebSocketOptions struct {
 	DialOptions *websocket.DialOptions
 }
 
+// CoderWebSocketDialer is a WebSocket dialer implementation based on coder/websocket.
 type CoderWebSocketDialer struct {
 	options CoderWebSocketOptions
 }
 
+// NewCoderWebSocketDialer creates a new CoderWebSocketDialer.
 func NewCoderWebSocketDialer(
 	options CoderWebSocketOptions,
 ) *CoderWebSocketDialer {
@@ -36,6 +34,7 @@ func NewCoderWebSocketDialer(
 	}
 }
 
+// Dial establishes a new WebSocket connection to the given URL.
 func (d *CoderWebSocketDialer) Dial(ctx context.Context, url string, header http.Header) (WebSocketConn, error) {
 	mergedHeader := http.Header{}
 	for k, v := range header {
@@ -68,12 +67,19 @@ func (d *CoderWebSocketDialer) Dial(ctx context.Context, url string, header http
 	return &CoderWebSocketConn{conn: conn, options: d.options, resp: resp}, nil
 }
 
+// CoderWebSocketConn is a WebSocket connection implementation based on coder/websocket.
 type CoderWebSocketConn struct {
 	conn    *websocket.Conn
 	resp    *http.Response
 	options CoderWebSocketOptions
 }
 
+// ReadMessage reads a message from the WebSocket connection.
+//
+// The ctx could be used to cancel the read operation. If the ctx is canceled or timedout,
+// the read operation will be canceled and the connection will be closed.
+//
+// If the returned error is Permanent, the future read operations on the same connection will not succeed.
 func (c *CoderWebSocketConn) ReadMessage(ctx context.Context) (MessageType, []byte, error) {
 	messageType, r, err := c.conn.Reader(ctx)
 	if err != nil {
@@ -95,6 +101,12 @@ func (c *CoderWebSocketConn) ReadMessage(ctx context.Context) (MessageType, []by
 	}
 }
 
+// WriteMessage writes a message to the WebSocket connection.
+//
+// The ctx could be used to cancel the write operation. If the ctx is canceled or timedout,
+// the write operation will be canceled and the connection will be closed.
+//
+// If the returned error is Permanent, the future write operations on the same connection will not succeed.
 func (c *CoderWebSocketConn) WriteMessage(ctx context.Context, messageType MessageType, data []byte) error {
 	switch messageType {
 	case MessageText:
@@ -106,10 +118,13 @@ func (c *CoderWebSocketConn) WriteMessage(ctx context.Context, messageType Messa
 	}
 }
 
+// Close closes the WebSocket connection.
 func (c *CoderWebSocketConn) Close() error {
 	return c.conn.Close(websocket.StatusNormalClosure, "")
 }
 
+// Response returns the *http.Response of the WebSocket connection.
+// Commonly used to get response headers.
 func (c *CoderWebSocketConn) Response() *http.Response {
 	return c.resp
 }

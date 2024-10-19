@@ -9,15 +9,20 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// WebSocketOptions is the options for WebSocketConn.
 type WebSocketOptions struct {
+	// ReadLimit is the maximum size of a message in bytes. ReadLimit <= 0 means no limit. Default is -1.
 	ReadLimit int64
-	Dialer    *websocket.Dialer
+	// Dialer is the websocket dialer. If nil, the default dialer will be used.
+	Dialer *websocket.Dialer
 }
 
+// WebSocketDialer is a WebSocket connection dialer implementation based on gorilla/websocket.
 type WebSocketDialer struct {
 	options WebSocketOptions
 }
 
+// NewWebSocketDialer creates a new WebSocketDialer.
 func NewWebSocketDialer(options WebSocketOptions) *WebSocketDialer {
 	if options.Dialer == nil {
 		options.Dialer = websocket.DefaultDialer
@@ -27,6 +32,7 @@ func NewWebSocketDialer(options WebSocketOptions) *WebSocketDialer {
 	}
 }
 
+// Dial establishes a new WebSocket connection to the given URL.
 func (d *WebSocketDialer) Dial(ctx context.Context, url string, header http.Header) (openairt.WebSocketConn, error) {
 	conn, resp, err := d.options.Dialer.DialContext(ctx, url, header)
 	if resp != nil && resp.Body != nil {
@@ -48,12 +54,14 @@ func (d *WebSocketDialer) Dial(ctx context.Context, url string, header http.Head
 	}, nil
 }
 
+// WebSocketConn is a WebSocket connection implementation based on gorilla/websocket.
 type WebSocketConn struct {
 	conn    *websocket.Conn
 	resp    *http.Response
 	options WebSocketOptions
 }
 
+// ReadMessage reads a message from the WebSocket connection.
 func (c *WebSocketConn) ReadMessage(ctx context.Context) (openairt.MessageType, []byte, error) {
 	deadline, ok := ctx.Deadline()
 	if ok {
@@ -83,6 +91,7 @@ func (c *WebSocketConn) ReadMessage(ctx context.Context) (openairt.MessageType, 
 	}
 }
 
+// WriteMessage writes a message to the WebSocket connection.
 func (c *WebSocketConn) WriteMessage(ctx context.Context, messageType openairt.MessageType, data []byte) error {
 	deadline, ok := ctx.Deadline()
 	if ok {
@@ -99,10 +108,13 @@ func (c *WebSocketConn) WriteMessage(ctx context.Context, messageType openairt.M
 	}
 }
 
+// Close closes the WebSocket connection.
 func (c *WebSocketConn) Close() error {
 	return c.conn.Close()
 }
 
+// Response returns the *http.Response of the WebSocket connection.
+// Commonly used to get response headers.
 func (c *WebSocketConn) Response() *http.Response {
 	return c.resp
 }
