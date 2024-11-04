@@ -515,42 +515,46 @@ func TestResponseCreatedEvent(t *testing.T) {
 
 func TestResponseDoneEvent(t *testing.T) {
 	data := `{
-    "event_id": "event_3132",
-    "type": "response.done",
-    "response": {
-        "id": "resp_001",
-        "object": "realtime.response",
+  "type": "response.done",
+  "event_id": "event_APnPcL4wUvPmXTFejvDzn",
+  "response": {
+    "object": "realtime.response",
+    "id": "resp_APnPbMhvCmC0K8qZALSeI",
+    "status": "completed",
+    "status_details": null,
+    "output": [
+      {
+        "id": "item_APnPbzHkH7zf8AteO9hdx",
+        "object": "realtime.item",
+        "type": "message",
         "status": "completed",
-        "status_details": null,
-        "output": [
-            {
-                "id": "msg_006",
-                "object": "realtime.item",
-                "type": "message",
-                "status": "completed",
-                "role": "assistant",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "Sure, how can I assist you today?"
-                    }
-                ]
-            }
-        ],
-        "usage": {
-            "total_tokens": 50,
-            "input_tokens": 20,
-            "output_tokens": 30
-        }
+        "role": "assistant",
+        "content": [
+          { "type": "audio", "transcript": "Hello! How can I help you today?" }
+        ]
+      }
+    ],
+    "usage": {
+      "total_tokens": 198,
+      "input_tokens": 136,
+      "output_tokens": 62,
+      "input_token_details": {
+        "text_tokens": 119,
+        "audio_tokens": 17,
+        "cached_tokens": 0,
+        "cached_tokens_details": { "text_tokens": 0, "audio_tokens": 0 }
+      },
+      "output_token_details": { "text_tokens": 19, "audio_tokens": 43 }
     }
+  }
 }`
 	expected := openairt.ResponseDoneEvent{
 		ServerEventBase: openairt.ServerEventBase{
-			EventID: "event_3132",
+			EventID: "event_APnPcL4wUvPmXTFejvDzn",
 			Type:    openairt.ServerEventTypeResponseDone,
 		},
 		Response: openairt.Response{
-			ID:            "resp_001",
+			ID:            "resp_APnPbMhvCmC0K8qZALSeI",
 			Object:        "realtime.response",
 			Status:        openairt.ResponseStatusCompleted,
 			StatusDetails: nil,
@@ -558,23 +562,36 @@ func TestResponseDoneEvent(t *testing.T) {
 				{
 					Object: "realtime.item",
 					MessageItem: openairt.MessageItem{
-						ID:     "msg_006",
+						ID:     "item_APnPbzHkH7zf8AteO9hdx",
 						Type:   openairt.MessageItemTypeMessage,
 						Status: openairt.ItemStatusCompleted,
 						Role:   openairt.MessageRoleAssistant,
 						Content: []openairt.MessageContentPart{
 							{
-								Type: openairt.MessageContentTypeText,
-								Text: "Sure, how can I assist you today?",
+								Type:       openairt.MessageContentTypeAudio,
+								Transcript: "Hello! How can I help you today?",
 							},
 						},
 					},
 				},
 			},
 			Usage: &openairt.Usage{
-				TotalTokens:  50,
-				InputTokens:  20,
-				OutputTokens: 30,
+				TotalTokens:  198,
+				InputTokens:  136,
+				OutputTokens: 62,
+				InputTokenDetails: openairt.InputTokenDetails{
+					TextTokens:   119,
+					AudioTokens:  17,
+					CachedTokens: 0,
+					CachedTokensDetails: openairt.CachedTokensDetails{
+						TextTokens:  0,
+						AudioTokens: 0,
+					},
+				},
+				OutputTokenDetails: openairt.OutputTokenDetails{
+					TextTokens:  19,
+					AudioTokens: 43,
+				},
 			},
 		},
 	}
