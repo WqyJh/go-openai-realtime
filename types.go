@@ -253,7 +253,7 @@ type ServerSession struct {
 	// Sampling temperature.
 	Temperature *float32 `json:"temperature,omitempty"`
 	// Maximum number of output tokens.
-	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
+	MaxOutputTokens IntOrInf `json:"max_response_output_tokens,omitempty"`
 }
 
 type ItemStatus string

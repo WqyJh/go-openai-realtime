@@ -96,7 +96,7 @@ func main() {
 			for data := range datas {
 				fulldata = append(fulldata, data...)
 			}
-			os.WriteFile(fmt.Sprintf("%s.pcm", event.(openairt.ResponseAudioDoneEvent).EventID), fulldata, 0o644)
+			// os.WriteFile(fmt.Sprintf("%s.pcm", event.(openairt.ResponseAudioDoneEvent).EventID), fulldata, 0o644)
 			streamer := pcm.NewPCMStream(
 				fulldata,
 				beep.Format{
@@ -136,7 +136,8 @@ func main() {
 			InputAudioTranscription: &openairt.InputAudioTranscription{
 				Model: openai.Whisper1,
 			},
-			TurnDetection: nil,
+			TurnDetection:   nil,
+			MaxOutputTokens: 4000,
 		},
 	})
 	if err != nil {
@@ -186,8 +187,7 @@ Loop:
 			conn.SendMessage(ctx, openairt.InputAudioBufferCommitEvent{})
 			conn.SendMessage(ctx, openairt.ResponseCreateEvent{
 				Response: openairt.ResponseCreateParams{
-					Modalities:      []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-					MaxOutputTokens: 4000,
+					Modalities: []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
 				},
 			})
 		}

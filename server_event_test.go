@@ -102,7 +102,7 @@ func TestSessionCreatedEvent(t *testing.T) {
         "tools": [],
         "tool_choice": "auto",
         "temperature": 0.8,
-        "max_output_tokens": null
+        "max_response_output_tokens": null
     }
 }`
 	temperature := float32(0.8)
@@ -163,7 +163,7 @@ func TestSessionUpdatedEvent(t *testing.T) {
         "tools": [],
         "tool_choice": "none",
         "temperature": 0.7,
-        "max_output_tokens": 200
+        "max_response_output_tokens": 200
     }
 }`
 	temperature := float32(0.7)
@@ -219,7 +219,7 @@ func TestSessionUpdatedEvent(t *testing.T) {
 			"tools": [],
 			"tool_choice": "none",
 			"temperature": 0.7,
-			"max_output_tokens": "inf"
+			"max_response_output_tokens": "inf"
 		}
 	}`
 	expected.Session.MaxOutputTokens = openairt.Inf

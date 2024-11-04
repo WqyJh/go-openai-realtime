@@ -107,7 +107,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 					}
 			},
 			"temperature": 0.5,
-			"max_output_tokens": 100
+			"max_response_output_tokens": 100
 	},
 	"type": "session.update"
 }`
@@ -199,7 +199,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 			"output_audio_format": "g711-ulaw",
 			"turn_detection": null,
 			"temperature": 0.5,
-			"max_output_tokens": 100
+			"max_response_output_tokens": 100
 	},
 	"type": "session.update"
 }`
