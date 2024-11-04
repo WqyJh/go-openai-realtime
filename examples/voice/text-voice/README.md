@@ -21,7 +21,7 @@ apt-get install portaudio19-dev
 
 ```bash
 export OPENAI_API_KEY=<your openai api key>
-export HTTP_PROXY=<your socks proxy> # this optional
+export HTTPS_PROXY=<your socks proxy like: socks5://127.0.0.1:1080> # this optional
 go run .
 ```
 
