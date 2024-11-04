@@ -281,10 +281,31 @@ const (
 	ResponseStatusFailed     ResponseStatus = "failed"
 )
 
+type CachedTokensDetails struct {
+	TextTokens  int `json:"text_tokens"`
+	AudioTokens int `json:"audio_tokens"`
+}
+
+type InputTokenDetails struct {
+	CachedTokens        int                 `json:"cached_tokens"`
+	TextTokens          int                 `json:"text_tokens"`
+	AudioTokens         int                 `json:"audio_tokens"`
+	CachedTokensDetails CachedTokensDetails `json:"cached_tokens_details,omitempty"`
+}
+
+type OutputTokenDetails struct {
+	TextTokens  int `json:"text_tokens"`
+	AudioTokens int `json:"audio_tokens"`
+}
+
 type Usage struct {
 	TotalTokens  int `json:"total_tokens"`
 	InputTokens  int `json:"input_tokens"`
 	OutputTokens int `json:"output_tokens"`
+	// Input token details.
+	InputTokenDetails InputTokenDetails `json:"input_token_details,omitempty"`
+	// Output token details.
+	OutputTokenDetails OutputTokenDetails `json:"output_token_details,omitempty"`
 }
 
 type Response struct {
