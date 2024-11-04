@@ -50,7 +50,7 @@ type ClientSession struct {
 	// Sampling temperature for the model.
 	Temperature *float32 `json:"temperature,omitempty"`
 	// Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or "inf" for the maximum available tokens for a given model. Defaults to "inf".
-	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
+	MaxOutputTokens IntOrInf `json:"max_response_output_tokens,omitempty"`
 }
 
 // SessionUpdateEvent is the event for session update.
