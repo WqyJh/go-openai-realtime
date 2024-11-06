@@ -10,8 +10,13 @@ type Voice string
 
 const (
 	VoiceAlloy   Voice = "alloy"
-	VoiceShimmer Voice = "shimmer"
+	VoiceAsh     Voice = "ash"
+	VoiceBallad  Voice = "ballad"
+	VoiceCoral   Voice = "coral"
 	VoiceEcho    Voice = "echo"
+	VoiceSage    Voice = "sage"
+	VoiceShimmer Voice = "shimmer"
+	VoiceVerse   Voice = "verse"
 )
 
 type AudioFormat string
