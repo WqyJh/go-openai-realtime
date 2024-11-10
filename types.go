@@ -2,8 +2,6 @@ package openairt
 
 import (
 	"encoding/json"
-
-	"github.com/sashabaranov/go-openai/jsonschema"
 )
 
 type Voice string
@@ -127,10 +125,10 @@ type InputAudioTranscription struct {
 }
 
 type Tool struct {
-	Type        ToolType              `json:"type"`
-	Name        string                `json:"name"`
-	Description string                `json:"description"`
-	Parameters  jsonschema.Definition `json:"parameters"`
+	Type        ToolType `json:"type"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Parameters  any      `json:"parameters"`
 }
 
 type MessageItemType string
