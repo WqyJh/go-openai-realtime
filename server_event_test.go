@@ -1,3 +1,4 @@
+//nolint:errcheck // no error
 package openairt_test
 
 import (
