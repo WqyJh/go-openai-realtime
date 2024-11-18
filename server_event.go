@@ -358,6 +358,8 @@ type ResponseFunctionCallArgumentsDoneEvent struct {
 	CallID string `json:"call_id"`
 	// The final arguments as a JSON string.
 	Arguments string `json:"arguments"`
+	// The name of the function. Not shown in API reference but present in the actual event.
+	Name string `json:"name"`
 }
 
 // RateLimitsUpdatedEvent is the event for rate limits updated.
