@@ -162,15 +162,23 @@ type MessageContentPart struct {
 
 type MessageItem struct {
 	// The unique ID of the item.
-	ID string `json:"id"`
+	ID string `json:"id,omitempty"`
 	// The type of the item ("message", "function_call", "function_call_output").
 	Type MessageItemType `json:"type"`
 	// The final status of the item.
-	Status ItemStatus `json:"status"`
+	Status ItemStatus `json:"status,omitempty"`
 	// The role associated with the item.
-	Role MessageRole `json:"role"`
+	Role MessageRole `json:"role,omitempty"`
 	// The content of the item.
-	Content []MessageContentPart `json:"content"`
+	Content []MessageContentPart `json:"content,omitempty"`
+	// The ID of the function call, if the item is a function call.
+	CallID string `json:"call_id,omitempty"`
+	// The name of the function, if the item is a function call.
+	Name string `json:"name,omitempty"`
+	// The arguments of the function, if the item is a function call.
+	Arguments string `json:"arguments,omitempty"`
+	// The output of the function, if the item is a function call output.
+	Output string `json:"output,omitempty"`
 }
 
 type ResponseMessageItem struct {
