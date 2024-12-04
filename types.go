@@ -21,8 +21,8 @@ type AudioFormat string
 
 const (
 	AudioFormatPcm16    AudioFormat = "pcm16"
-	AudioFormatG711Ulaw AudioFormat = "g711-ulaw"
-	AudioFormatG711Alaw AudioFormat = "g711-alaw"
+	AudioFormatG711Ulaw AudioFormat = "g711_ulaw"
+	AudioFormatG711Alaw AudioFormat = "g711_alaw"
 )
 
 type Modality string

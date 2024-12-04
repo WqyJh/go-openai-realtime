@@ -72,7 +72,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 			"instructions": "test-instructions",
 			"voice": "alloy",
 			"input_audio_format": "pcm16",
-			"output_audio_format": "g711-ulaw",
+			"output_audio_format": "g711_ulaw",
 			"input_audio_transcription": {
 					"model": "whisper-1"
 			},
@@ -126,7 +126,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 				"instructions": "test-instructions",
 				"voice": "alloy",
 				"input_audio_format": "pcm16",
-				"output_audio_format": "g711-ulaw",
+				"output_audio_format": "g711_ulaw",
 				"input_audio_transcription": {
 						"model": "whisper-1"
 				},
@@ -196,7 +196,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 			"instructions": "test-instructions",
 			"voice": "alloy",
 			"input_audio_format": "pcm16",
-			"output_audio_format": "g711-ulaw",
+			"output_audio_format": "g711_ulaw",
 			"turn_detection": null,
 			"temperature": 0.5,
 			"max_response_output_tokens": 100
@@ -380,7 +380,7 @@ func TestResponseCreateEvent(t *testing.T) {
 		],
 		"instructions": "test-instructions",
 		"voice": "alloy",
-		"output_audio_format": "g711-ulaw",
+		"output_audio_format": "g711_ulaw",
 		"tool_choice": "auto",
 		"max_output_tokens": 100
 	},
@@ -392,7 +392,7 @@ func TestResponseCreateEvent(t *testing.T) {
 	message.Response.MaxOutputTokens = openairt.Inf
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
-	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711-ulaw","tool_choice":"auto","max_output_tokens":"inf"},"type":"response.create"}`
+	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711_ulaw","tool_choice":"auto","max_output_tokens":"inf"},"type":"response.create"}`
 	require.JSONEq(t, expected, string(data))
 }
 
