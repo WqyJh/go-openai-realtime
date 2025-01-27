@@ -397,15 +397,17 @@ func TestResponseCreateEvent(t *testing.T) {
 }
 
 func TestResponseCancelEvent(t *testing.T) {
-	message := openairt.ResponseCancelEvent{}
+	message := openairt.ResponseCancelEvent{
+		ResponseID: "test-response-id",
+	}
 	data, err := json.Marshal(message)
 	require.NoError(t, err)
-	expected := `{"type":"response.cancel"}`
+	expected := `{"response_id":"test-response-id","type":"response.cancel"}`
 	require.JSONEq(t, expected, string(data))
 
 	message.EventBase.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
-	expected = `{"event_id":"test-id","type":"response.cancel"}`
+	expected = `{"event_id":"test-id","response_id":"test-response-id","type":"response.cancel"}`
 	require.JSONEq(t, expected, string(data))
 }
