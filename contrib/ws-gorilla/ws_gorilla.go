@@ -118,3 +118,14 @@ func (c *WebSocketConn) Close() error {
 func (c *WebSocketConn) Response() *http.Response {
 	return c.resp
 }
+
+// Ping sends a ping message to the WebSocket connection.
+// It won't be blocked until the pong message is received.
+func (c *WebSocketConn) Ping(ctx context.Context) error {
+	deadline, ok := ctx.Deadline()
+	if ok {
+		_ = c.conn.SetWriteDeadline(deadline)
+	}
+
+	return c.conn.WriteControl(websocket.PingMessage, []byte{}, deadline)
+}

@@ -54,6 +54,9 @@ type WebSocketConn interface {
 	// Response returns the *http.Response of the WebSocket connection.
 	// Commonly used to get response headers.
 	Response() *http.Response
+
+	// Ping sends a ping message to the WebSocket connection.
+	Ping(ctx context.Context) error
 }
 
 // WebSocketDialer is a WebSocket connection dialer abstraction.

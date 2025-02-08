@@ -58,6 +58,11 @@ func (c *Conn) ReadMessage(ctx context.Context) (ServerEvent, error) {
 	return event, nil
 }
 
+// Ping sends a ping message to the WebSocket connection.
+func (c *Conn) Ping(ctx context.Context) error {
+	return c.conn.Ping(ctx)
+}
+
 // ConnHandler is a handler for a connection to the OpenAI Realtime API.
 // It reads messages from the server in a standalone goroutine and calls the registered handlers.
 // It is the responsibility of the caller to call Start and Stop.

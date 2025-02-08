@@ -3,7 +3,7 @@ module github.com/WqyJh/go-openai-realtime/examples
 go 1.19
 
 require (
-	github.com/WqyJh/go-openai-realtime v0.3.0-alpha
+	github.com/WqyJh/go-openai-realtime v0.3.5-0.20250208091501-af3079f3fb2b
 	github.com/faiface/beep v1.1.0
 	github.com/gordonklaus/portaudio v0.0.0-20230709114228-aafa478834f5
 	github.com/sashabaranov/go-openai v1.32.0
