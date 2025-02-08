@@ -7,8 +7,11 @@ import (
 )
 
 const (
-	GPT4oRealtimePreview         = "gpt-4o-realtime-preview"
-	GPT4oRealtimePreview20241001 = "gpt-4o-realtime-preview-2024-10-01"
+	GPT4oRealtimePreview             = "gpt-4o-realtime-preview"
+	GPT4oRealtimePreview20241001     = "gpt-4o-realtime-preview-2024-10-01"
+	GPT4oRealtimePreview20241217     = "gpt-4o-realtime-preview-2024-12-17"
+	GPT4oMiniRealtimePreview         = "gpt-4o-mini-realtime-preview"
+	GPT4oMiniRealtimePreview20241217 = "gpt-4o-mini-realtime-preview-2024-12-17"
 )
 
 // Client is OpenAI Realtime API client.
