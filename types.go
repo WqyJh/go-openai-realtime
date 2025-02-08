@@ -64,6 +64,8 @@ type TurnDetectionParams struct {
 	PrefixPaddingMs int `json:"prefix_padding_ms,omitempty"`
 	// Duration of silence to detect speech stop (in milliseconds).
 	SilenceDurationMs int `json:"silence_duration_ms,omitempty"`
+	// Whether or not to automatically generate a response when VAD is enabled. true by default.
+	CreateResponse *bool `json:"create_response,omitempty"`
 }
 
 type ClientTurnDetection struct {
