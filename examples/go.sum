@@ -1,6 +1,6 @@
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/WqyJh/go-openai-realtime v0.3.0-alpha h1:2IDh9xm3VLAXnmOtbOhv2/ytMceJYgj7Cw0e1TbqBpY=
-github.com/WqyJh/go-openai-realtime v0.3.0-alpha/go.mod h1:nmUYODacQuObuh0DFSEIDfJM9L4ZFDRU/OEGYMryt60=
+github.com/WqyJh/go-openai-realtime v0.3.5-0.20250208091501-af3079f3fb2b h1:8teuz/JaWkMaqBrlIKF86EhHi0ajbJrm+shD1IXCvK8=
+github.com/WqyJh/go-openai-realtime v0.3.5-0.20250208091501-af3079f3fb2b/go.mod h1:nmUYODacQuObuh0DFSEIDfJM9L4ZFDRU/OEGYMryt60=
 github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=
 github.com/coder/websocket v1.8.12/go.mod h1:LNVeNrXQZfe5qhS9ALED3uA+l5pPqvwXg3CKoDBB2gs=
 github.com/d4l3k/messagediff v1.2.2-0.20190829033028-7e0a312ae40b/go.mod h1:Oozbb1TVXFac9FtSIxHBMnBCq2qeH/2KkEQxENCrlLo=

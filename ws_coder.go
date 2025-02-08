@@ -130,6 +130,7 @@ func (c *CoderWebSocketConn) Response() *http.Response {
 }
 
 // Ping sends a ping message to the WebSocket connection.
+// It would be blocked until the pong message is received or the ctx is done.
 func (c *CoderWebSocketConn) Ping(ctx context.Context) error {
 	return c.conn.Ping(ctx)
 }
