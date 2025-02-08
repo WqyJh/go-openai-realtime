@@ -278,6 +278,8 @@ func (m ResponseCreateEvent) MarshalJSON() ([]byte, error) {
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel
 type ResponseCancelEvent struct {
 	EventBase
+	// A specific response ID to cancel - if not provided, will cancel an in-progress response in the default conversation.
+	ResponseID string `json:"response_id,omitempty"`
 }
 
 func (m ResponseCancelEvent) ClientEventType() ClientEventType {
