@@ -1,5 +1,7 @@
 package openairt
 
+import "net/http"
+
 // APIType is the type of API.
 type APIType string
 
@@ -13,6 +15,9 @@ const (
 const (
 	// OpenaiRealtimeAPIURLv1 is the base URL for the OpenAI Realtime API.
 	OpenaiRealtimeAPIURLv1 = "wss://api.openai.com/v1/realtime"
+
+	// OpenaiAPIURLv1 is the base URL for the OpenAI API.
+	OpenaiAPIURLv1 = "https://api.openai.com/v1"
 )
 
 const (
@@ -25,17 +30,21 @@ type ClientConfig struct {
 	authToken string
 
 	BaseURL    string  // Base URL for the API. Defaults to "wss://api.openai.com/v1/realtime"
+	APIBaseURL string  // Base URL for the API. Defaults to "https://api.openai.com/v1"
 	APIType    APIType // API type. Defaults to APITypeOpenAI
 	APIVersion string  // required when APIType is APITypeAzure
+	HTTPClient *http.Client
 }
 
 // DefaultConfig creates a new ClientConfig with the given auth token.
 // Defaults to using the OpenAI Realtime API.
 func DefaultConfig(authToken string) ClientConfig {
 	return ClientConfig{
-		authToken: authToken,
-		BaseURL:   OpenaiRealtimeAPIURLv1,
-		APIType:   APITypeOpenAI,
+		authToken:  authToken,
+		BaseURL:    OpenaiRealtimeAPIURLv1,
+		APIBaseURL: OpenaiAPIURLv1,
+		APIType:    APITypeOpenAI,
+		HTTPClient: &http.Client{},
 	}
 }
 
@@ -47,6 +56,7 @@ func DefaultAzureConfig(apiKey, baseURL string) ClientConfig {
 		BaseURL:    baseURL,
 		APIType:    APITypeAzure,
 		APIVersion: azureAPIVersion20241001Preview,
+		HTTPClient: &http.Client{},
 	}
 }
 

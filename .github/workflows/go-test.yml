@@ -27,3 +27,5 @@ jobs:
           version: latest
       - name: Run tests
         run: make test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

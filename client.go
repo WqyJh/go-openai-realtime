@@ -7,8 +7,11 @@ import (
 )
 
 const (
-	GPT4oRealtimePreview         = "gpt-4o-realtime-preview"
-	GPT4oRealtimePreview20241001 = "gpt-4o-realtime-preview-2024-10-01"
+	GPT4oRealtimePreview             = "gpt-4o-realtime-preview"
+	GPT4oRealtimePreview20241001     = "gpt-4o-realtime-preview-2024-10-01"
+	GPT4oRealtimePreview20241217     = "gpt-4o-realtime-preview-2024-12-17"
+	GPT4oMiniRealtimePreview         = "gpt-4o-mini-realtime-preview"
+	GPT4oMiniRealtimePreview20241217 = "gpt-4o-mini-realtime-preview-2024-12-17"
 )
 
 // Client is OpenAI Realtime API client.
@@ -109,4 +112,27 @@ func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, err
 	}
 
 	return &Conn{conn: conn, logger: connectOpts.logger}, nil
+}
+
+func (c *Client) getAPIHeaders() http.Header {
+	headers := http.Header{}
+
+	if c.config.APIType == APITypeAzure {
+		headers.Set("api-key", c.config.authToken)
+	} else {
+		headers.Set("Authorization", "Bearer "+c.config.authToken)
+	}
+	headers.Set("Content-Type", "application/json")
+	return headers
+}
+
+func (c *Client) CreateSession(ctx context.Context, req *CreateSessionRequest) (*CreateSessionResponse, error) {
+	return HTTPDo[CreateSessionRequest, CreateSessionResponse](
+		ctx,
+		c.config.APIBaseURL+"/realtime/sessions",
+		req,
+		WithClient(c.config.HTTPClient),
+		WithMethod(http.MethodPost),
+		WithHeaders(c.getAPIHeaders()),
+	)
 }
