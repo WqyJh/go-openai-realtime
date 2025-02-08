@@ -35,27 +35,27 @@ type httpOption struct {
 	method  string
 }
 
-type HttpOption func(*httpOption)
+type HTTPOption func(*httpOption)
 
-func WithHeaders(headers http.Header) HttpOption {
+func WithHeaders(headers http.Header) HTTPOption {
 	return func(o *httpOption) {
 		o.headers = headers
 	}
 }
 
-func WithClient(client *http.Client) HttpOption {
+func WithClient(client *http.Client) HTTPOption {
 	return func(o *httpOption) {
 		o.client = client
 	}
 }
 
-func WithMethod(method string) HttpOption {
+func WithMethod(method string) HTTPOption {
 	return func(o *httpOption) {
 		o.method = method
 	}
 }
 
-func HttpDo[Q any, R any](ctx context.Context, url string, req *Q, opts ...HttpOption) (resp *R, err error) {
+func HTTPDo[Q any, R any](ctx context.Context, url string, req *Q, opts ...HTTPOption) (*R, error) {
 	opt := httpOption{
 		client:  http.DefaultClient,
 		headers: http.Header{},
@@ -81,12 +81,16 @@ func HttpDo[Q any, R any](ctx context.Context, url string, req *Q, opts ...HttpO
 	if err != nil {
 		return nil, fmt.Errorf("http failed: %w", err)
 	}
+	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("http status code: %d", response.StatusCode)
 	}
+
+	var resp R
 	err = json.NewDecoder(response.Body).Decode(&resp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
-	return resp, err
+	return &resp, nil
 }

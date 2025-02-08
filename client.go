@@ -114,7 +114,7 @@ func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, err
 	return &Conn{conn: conn, logger: connectOpts.logger}, nil
 }
 
-func (c *Client) getApiHeaders() http.Header {
+func (c *Client) getAPIHeaders() http.Header {
 	headers := http.Header{}
 
 	if c.config.APIType == APITypeAzure {
@@ -127,12 +127,12 @@ func (c *Client) getApiHeaders() http.Header {
 }
 
 func (c *Client) CreateSession(ctx context.Context, req *CreateSessionRequest) (*CreateSessionResponse, error) {
-	return HttpDo[CreateSessionRequest, CreateSessionResponse](
+	return HTTPDo[CreateSessionRequest, CreateSessionResponse](
 		ctx,
-		c.config.ApiBaseURL+"/realtime/sessions",
+		c.config.APIBaseURL+"/realtime/sessions",
 		req,
 		WithClient(c.config.HTTPClient),
 		WithMethod(http.MethodPost),
-		WithHeaders(c.getApiHeaders()),
+		WithHeaders(c.getAPIHeaders()),
 	)
 }

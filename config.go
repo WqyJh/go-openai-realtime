@@ -30,7 +30,7 @@ type ClientConfig struct {
 	authToken string
 
 	BaseURL    string  // Base URL for the API. Defaults to "wss://api.openai.com/v1/realtime"
-	ApiBaseURL string  // Base URL for the API. Defaults to "https://api.openai.com/v1"
+	APIBaseURL string  // Base URL for the API. Defaults to "https://api.openai.com/v1"
 	APIType    APIType // API type. Defaults to APITypeOpenAI
 	APIVersion string  // required when APIType is APITypeAzure
 	HTTPClient *http.Client
@@ -42,7 +42,7 @@ func DefaultConfig(authToken string) ClientConfig {
 	return ClientConfig{
 		authToken:  authToken,
 		BaseURL:    OpenaiRealtimeAPIURLv1,
-		ApiBaseURL: OpenaiAPIURLv1,
+		APIBaseURL: OpenaiAPIURLv1,
 		APIType:    APITypeOpenAI,
 		HTTPClient: &http.Client{},
 	}
