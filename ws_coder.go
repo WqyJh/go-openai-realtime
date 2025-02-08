@@ -128,3 +128,8 @@ func (c *CoderWebSocketConn) Close() error {
 func (c *CoderWebSocketConn) Response() *http.Response {
 	return c.resp
 }
+
+// Ping sends a ping message to the WebSocket connection.
+func (c *CoderWebSocketConn) Ping(ctx context.Context) error {
+	return c.conn.Ping(ctx)
+}

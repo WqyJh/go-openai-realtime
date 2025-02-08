@@ -22,6 +22,7 @@ type mockWebSocketConn struct {
 	writeMessageFunc func(ctx context.Context, messageType openairt.MessageType, data []byte) error
 	closeFunc        func() error
 	responseFunc     func() *http.Response
+	pingFunc         func(ctx context.Context) error
 }
 
 func (m *mockWebSocketConn) ReadMessage(ctx context.Context) (openairt.MessageType, []byte, error) {
@@ -38,6 +39,10 @@ func (m *mockWebSocketConn) Close() error {
 
 func (m *mockWebSocketConn) Response() *http.Response {
 	return m.responseFunc()
+}
+
+func (m *mockWebSocketConn) Ping(ctx context.Context) error {
+	return m.pingFunc(ctx)
 }
 
 func TestConnect(t *testing.T) {
