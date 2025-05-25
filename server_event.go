@@ -11,6 +11,7 @@ const (
 	ServerEventTypeError                                            ServerEventType = "error"
 	ServerEventTypeSessionCreated                                   ServerEventType = "session.created"
 	ServerEventTypeSessionUpdated                                   ServerEventType = "session.updated"
+	ServerEventTypeTranscriptionSessionUpdated                      ServerEventType = "transcription_session.updated"
 	ServerEventTypeConversationCreated                              ServerEventType = "conversation.created"
 	ServerEventTypeInputAudioBufferCommitted                        ServerEventType = "input_audio_buffer.committed"
 	ServerEventTypeInputAudioBufferCleared                          ServerEventType = "input_audio_buffer.cleared"
@@ -77,6 +78,15 @@ type SessionCreatedEvent struct {
 // Returned when a session is updated.
 // See https://platform.openai.com/docs/api-reference/realtime-server-events/session/updated
 type SessionUpdatedEvent struct {
+	ServerEventBase
+	// The updated session resource.
+	Session ServerSession `json:"session"`
+}
+
+// TranscriptionSessionUpdatedEvent is the event for session updated.
+// Returned when a session is updated.
+// See https://platform.openai.com/docs/api-reference/realtime-server-events/session/updated
+type TranscriptionSessionUpdatedEvent struct {
 	ServerEventBase
 	// The updated session resource.
 	Session ServerSession `json:"session"`
@@ -375,6 +385,7 @@ type ServerEventInterface interface {
 	ErrorEvent |
 		SessionCreatedEvent |
 		SessionUpdatedEvent |
+		TranscriptionSessionUpdatedEvent |
 		ConversationCreatedEvent |
 		InputAudioBufferCommittedEvent |
 		InputAudioBufferClearedEvent |
@@ -427,6 +438,8 @@ func UnmarshalServerEvent(data []byte) (ServerEvent, error) { //nolint:funlen,cy
 		return unmarshalServerEvent[SessionCreatedEvent](data)
 	case ServerEventTypeSessionUpdated:
 		return unmarshalServerEvent[SessionUpdatedEvent](data)
+	case ServerEventTypeTranscriptionSessionUpdated:
+		return unmarshalServerEvent[TranscriptionSessionUpdatedEvent](data)
 	case ServerEventTypeConversationCreated:
 		return unmarshalServerEvent[ConversationCreatedEvent](data)
 	case ServerEventTypeInputAudioBufferCommitted:
