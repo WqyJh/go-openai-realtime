@@ -52,6 +52,8 @@ type ClientSession struct {
 	Temperature *float32 `json:"temperature,omitempty"`
 	// Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or "inf" for the maximum available tokens for a given model. Defaults to "inf".
 	MaxOutputTokens IntOrInf `json:"max_response_output_tokens,omitempty"`
+	// Configuration for input audio noise reduction. This can be set to null to turn off. Noise reduction filters audio added to the input audio buffer before it is sent to VAD and the model. Filtering the audio can improve VAD and turn detection accuracy (reducing false positives) and model performance by improving perception of the input audio.
+	InputAudioNoiseReduction *InputAudioNoiseReduction `json:"input_audio_noise_reduction,omitempty"`
 }
 
 // SessionUpdateEvent is the event for session update.

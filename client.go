@@ -2,7 +2,7 @@ package openairt
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
 	"net/url"
 )
@@ -13,6 +13,13 @@ const (
 	GPT4oRealtimePreview20241217     = "gpt-4o-realtime-preview-2024-12-17"
 	GPT4oMiniRealtimePreview         = "gpt-4o-mini-realtime-preview"
 	GPT4oMiniRealtimePreview20241217 = "gpt-4o-mini-realtime-preview-2024-12-17"
+)
+
+// Transcription models.
+const (
+	GPT4oTranscribe     = "gpt-4o-transcribe"
+	GPT4oMiniTranscribe = "gpt-4o-mini-transcribe"
+	Whisper1            = "whisper-1"
 )
 
 // Client is OpenAI Realtime API client.
@@ -74,7 +81,7 @@ func WithModel(model string) ConnectOption {
 	}
 }
 
-// Set transcription intent instead of model
+// Set transcription intent instead of model.
 func WithIntent() ConnectOption {
 	return func(opts *connectOption) {
 		opts.intent = "transcription"
@@ -113,10 +120,10 @@ func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, err
 
 	// get url by model
 	var url string
-	if connectOpts.intent == "" {
+	if connectOpts.intent == "" { //nolint:gocritic // if conditions would be determined in order
 		url = c.getURL(connectOpts.model)
 	} else if c.config.APIType != APITypeOpenAI {
-		return nil, fmt.Errorf("Azure API type with intent set not implemented");
+		return nil, errors.New("intent not supported for Azure API type")
 	} else {
 		url = c.config.BaseURL + "?" + "intent=" + connectOpts.intent
 	}
@@ -146,6 +153,18 @@ func (c *Client) CreateSession(ctx context.Context, req *CreateSessionRequest) (
 	return HTTPDo[CreateSessionRequest, CreateSessionResponse](
 		ctx,
 		c.config.APIBaseURL+"/realtime/sessions",
+		req,
+		WithClient(c.config.HTTPClient),
+		WithMethod(http.MethodPost),
+		WithHeaders(c.getAPIHeaders()),
+	)
+}
+
+// CreateTranscriptionSession creates a new transcription session.
+func (c *Client) CreateTranscriptionSession(ctx context.Context, req *CreateTranscriptionSessionRequest) (*CreateTranscriptionSessionResponse, error) {
+	return HTTPDo[CreateTranscriptionSessionRequest, CreateTranscriptionSessionResponse](
+		ctx,
+		c.config.APIBaseURL+"/realtime/transcription_sessions",
 		req,
 		WithClient(c.config.HTTPClient),
 		WithMethod(http.MethodPost),
