@@ -19,4 +19,4 @@ require (
 	golang.org/x/sys v0.25.0 // indirect
 )
 
-// replace github.com/WqyJh/go-openai-realtime => ../
+replace github.com/WqyJh/go-openai-realtime => ../

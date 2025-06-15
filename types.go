@@ -12,6 +12,9 @@ const (
 	VoiceBallad  Voice = "ballad"
 	VoiceCoral   Voice = "coral"
 	VoiceEcho    Voice = "echo"
+	VoiceFable   Voice = "fable"
+	VoiceOnyx    Voice = "onyx"
+	VoiceNova    Voice = "nova"
 	VoiceSage    Voice = "sage"
 	VoiceShimmer Voice = "shimmer"
 	VoiceVerse   Voice = "verse"
@@ -35,26 +38,16 @@ const (
 type ClientTurnDetectionType string
 
 const (
-	ClientTurnDetectionTypeServerVad ClientTurnDetectionType = "server_vad"
+	ClientTurnDetectionTypeServerVad   ClientTurnDetectionType = "server_vad"
+	ClientTurnDetectionTypeSemanticVad ClientTurnDetectionType = "semantic_vad"
 )
 
 type ServerTurnDetectionType string
 
 const (
-	ServerTurnDetectionTypeNone      ServerTurnDetectionType = "none"
-	ServerTurnDetectionTypeServerVad ServerTurnDetectionType = "server_vad"
-)
-
-type TurnDetectionType string
-
-const (
-	// TurnDetectionTypeNone means turn detection is disabled.
-	// This can only be used in ServerSession, not in ClientSession.
-	// If you want to disable turn detection, you should send SessionUpdateEvent with TurnDetection set to nil.
-	TurnDetectionTypeNone TurnDetectionType = "none"
-	// TurnDetectionTypeServerVad use server-side VAD to detect turn.
-	// This is default value for newly created session.
-	TurnDetectionTypeServerVad TurnDetectionType = "server_vad"
+	ServerTurnDetectionTypeNone        ServerTurnDetectionType = "none"
+	ServerTurnDetectionTypeServerVad   ServerTurnDetectionType = "server_vad"
+	ServerTurnDetectionTypeSemanticVad ServerTurnDetectionType = "semantic_vad"
 )
 
 type TurnDetectionParams struct {
@@ -64,10 +57,18 @@ type TurnDetectionParams struct {
 	PrefixPaddingMs int `json:"prefix_padding_ms,omitempty"`
 	// Duration of silence to detect speech stop (in milliseconds).
 	SilenceDurationMs int `json:"silence_duration_ms,omitempty"`
-	// Whether or not to automatically generate a response when VAD is enabled. true by default.
+	// Whether or not to automatically generate a response when a VAD stop event occurs.
+	// Defaults to true.
 	CreateResponse *bool `json:"create_response,omitempty"`
+	// Used only for semantic_vad mode. The eagerness of the model to respond. low will wait longer for the user to continue speaking, high will respond more quickly. auto is the default and is equivalent to medium.
+	// Defaults to "auto".
+	Eagerness string `json:"eagerness,omitempty"`
+	// Whether or not to automatically interrupt any ongoing response with output to the default conversation (i.e. conversation of auto) when a VAD start event occurs.
+	// Defaults to true.
+	InterruptResponse *bool `json:"interrupt_response,omitempty"`
 }
 
+// Configuration for turn detection, ether Server VAD or Semantic VAD. This can be set to null to turn off, in which case the client must manually trigger model response. Server VAD means that the model will detect the start and end of speech based on audio volume and respond at the end of user speech. Semantic VAD is more advanced and uses a turn detection model (in conjuction with VAD) to semantically estimate whether the user has finished speaking, then dynamically sets a timeout based on this probability. For example, if user audio trails off with "uhhm", the model will score a low probability of turn end and wait longer for the user to continue speaking. This can be useful for more natural conversations, but may have a higher latency.
 type ClientTurnDetection struct {
 	// Type of turn detection, only "server_vad" is currently supported.
 	Type ClientTurnDetectionType `json:"type"`
@@ -123,11 +124,11 @@ const (
 
 type InputAudioTranscription struct {
 	// The model used for transcription.
-	Model    string `json:"model"`
+	Model string `json:"model"`
 	// The language of the input audio. Supplying the input language in ISO-639-1 (e.g. en) format will improve accuracy and latency.
 	Language string `json:"language,omitempty"`
 	// An optional text to guide the model's style or continue a previous audio segment. For whisper-1, the prompt is a list of keywords. For gpt-4o-transcribe models, the prompt is a free text string, for example "expect words related to technology".
-	Prompt   string `json:"prompt,omitempty"`
+	Prompt string `json:"prompt,omitempty"`
 }
 
 type Tool struct {

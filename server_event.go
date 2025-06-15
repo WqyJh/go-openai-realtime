@@ -19,6 +19,7 @@ const (
 	ServerEventTypeInputAudioBufferSpeechStopped                    ServerEventType = "input_audio_buffer.speech_stopped"
 	ServerEventTypeConversationItemCreated                          ServerEventType = "conversation.item.created"
 	ServerEventTypeConversationItemInputAudioTranscriptionCompleted ServerEventType = "conversation.item.input_audio_transcription.completed"
+	ServerEventTypeConversationItemInputAudioTranscriptionDelta     ServerEventType = "conversation.item.input_audio_transcription.delta"
 	ServerEventTypeConversationItemInputAudioTranscriptionFailed    ServerEventType = "conversation.item.input_audio_transcription.failed"
 	ServerEventTypeConversationItemTruncated                        ServerEventType = "conversation.item.truncated"
 	ServerEventTypeConversationItemDeleted                          ServerEventType = "conversation.item.deleted"
@@ -152,6 +153,13 @@ type ConversationItemInputAudioTranscriptionCompletedEvent struct {
 	ItemID       string `json:"item_id"`
 	ContentIndex int    `json:"content_index"`
 	Transcript   string `json:"transcript"`
+}
+
+type ConversationItemInputAudioTranscriptionDeltaEvent struct {
+	ServerEventBase
+	ItemID       string `json:"item_id"`
+	ContentIndex int    `json:"content_index"`
+	Delta        string `json:"delta"`
 }
 
 type ConversationItemInputAudioTranscriptionFailedEvent struct {
@@ -393,6 +401,7 @@ type ServerEventInterface interface {
 		InputAudioBufferSpeechStoppedEvent |
 		ConversationItemCreatedEvent |
 		ConversationItemInputAudioTranscriptionCompletedEvent |
+		ConversationItemInputAudioTranscriptionDeltaEvent |
 		ConversationItemInputAudioTranscriptionFailedEvent |
 		ConversationItemTruncatedEvent |
 		ConversationItemDeletedEvent |
@@ -423,7 +432,7 @@ func unmarshalServerEvent[T ServerEventInterface](data []byte) (T, error) {
 }
 
 // UnmarshalServerEvent unmarshals the server event from the given JSON data.
-func UnmarshalServerEvent(data []byte) (ServerEvent, error) { //nolint:funlen,cyclop // TODO: optimize
+func UnmarshalServerEvent(data []byte) (ServerEvent, error) { //nolint:funlen,cyclop,gocyclo // TODO: optimize
 	var eventType struct {
 		Type ServerEventType `json:"type"`
 	}
@@ -454,6 +463,8 @@ func UnmarshalServerEvent(data []byte) (ServerEvent, error) { //nolint:funlen,cy
 		return unmarshalServerEvent[ConversationItemCreatedEvent](data)
 	case ServerEventTypeConversationItemInputAudioTranscriptionCompleted:
 		return unmarshalServerEvent[ConversationItemInputAudioTranscriptionCompletedEvent](data)
+	case ServerEventTypeConversationItemInputAudioTranscriptionDelta:
+		return unmarshalServerEvent[ConversationItemInputAudioTranscriptionDeltaEvent](data)
 	case ServerEventTypeConversationItemInputAudioTranscriptionFailed:
 		return unmarshalServerEvent[ConversationItemInputAudioTranscriptionFailedEvent](data)
 	case ServerEventTypeConversationItemTruncated:

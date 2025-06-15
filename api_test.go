@@ -95,3 +95,109 @@ func TestCreateSessionResponse(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expected, actual)
 }
+
+func TestCreateTranscriptionSessionRequest(t *testing.T) {
+	data := `{
+    "input_audio_format": "pcm16",
+    "input_audio_transcription": {
+        "model": "gpt-4o-transcribe",
+        "language": "en",
+        "prompt": "This is a test transcription"
+    },
+    "input_audio_noise_reduction": {
+        "type": "near_field"
+    },
+    "modalities": ["text"],
+    "turn_detection": {
+        "type": "server_vad",
+        "threshold": 0.6,
+        "prefix_padding_ms": 300,
+        "silence_duration_ms": 500
+    },
+    "include": ["item.input_audio_transcription.logprobs"]
+}`
+	expected := openairt.CreateTranscriptionSessionRequest{
+		InputAudioFormat: openairt.AudioFormatPcm16,
+		InputAudioTranscription: &openairt.InputAudioTranscription{
+			Model:    "gpt-4o-transcribe",
+			Language: "en",
+			Prompt:   "This is a test transcription",
+		},
+		InputAudioNoiseReduction: &openairt.InputAudioNoiseReduction{
+			Type: "near_field",
+		},
+		Modalities: []openairt.Modality{
+			openairt.ModalityText,
+		},
+		TurnDetection: &openairt.ClientTurnDetection{
+			Type: openairt.ClientTurnDetectionTypeServerVad,
+			TurnDetectionParams: openairt.TurnDetectionParams{
+				Threshold:         0.6,
+				PrefixPaddingMs:   300,
+				SilenceDurationMs: 500,
+			},
+		},
+		Include: []string{"item.input_audio_transcription.logprobs"},
+	}
+
+	var actual openairt.CreateTranscriptionSessionRequest
+	err := json.Unmarshal([]byte(data), &actual)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+
+	actualBytes, err := json.Marshal(actual)
+	require.NoError(t, err)
+	jsontools.RequireJSONEq(t, data, string(actualBytes))
+}
+
+func TestCreateTranscriptionSessionResponse(t *testing.T) {
+	data := `{
+    "id": "trans_123456",
+    "object": "realtime.transcription_session",
+    "input_audio_format": "pcm16",
+    "input_audio_transcription": {
+        "model": "gpt-4o-transcribe",
+        "language": "en"
+    },
+    "modalities": ["text"],
+    "turn_detection": {
+        "type": "server_vad",
+        "threshold": 0.6,
+        "prefix_padding_ms": 300,
+        "silence_duration_ms": 500
+    },
+    "client_secret": {
+        "value": "ek_trans_abc123",
+        "expires_at": 1234567890
+    }
+}`
+	expected := openairt.CreateTranscriptionSessionResponse{
+		ID:               "trans_123456",
+		Object:           "realtime.transcription_session",
+		InputAudioFormat: openairt.AudioFormatPcm16,
+		InputAudioTranscription: &openairt.InputAudioTranscription{
+			Model:    "gpt-4o-transcribe",
+			Language: "en",
+		},
+		Modalities: []openairt.Modality{
+			openairt.ModalityText,
+		},
+		TurnDetection: &openairt.ServerTurnDetection{
+			Type: openairt.ServerTurnDetectionTypeServerVad,
+			TurnDetectionParams: openairt.TurnDetectionParams{
+				Threshold:         0.6,
+				PrefixPaddingMs:   300,
+				SilenceDurationMs: 500,
+			},
+		},
+		ClientSecret: openairt.ClientSecret{
+			Value:     "ek_trans_abc123",
+			ExpiresAt: 1234567890,
+		},
+	}
+
+	var actual openairt.CreateTranscriptionSessionResponse
+	err := json.Unmarshal([]byte(data), &actual)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
+}
