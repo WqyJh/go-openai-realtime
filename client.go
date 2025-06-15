@@ -2,6 +2,7 @@ package openairt
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 )
@@ -59,6 +60,7 @@ func (c *Client) getHeaders() http.Header {
 
 type connectOption struct {
 	model  string
+	intent string
 	dialer WebSocketDialer
 	logger Logger
 }
@@ -69,6 +71,13 @@ type ConnectOption func(*connectOption)
 func WithModel(model string) ConnectOption {
 	return func(opts *connectOption) {
 		opts.model = model
+	}
+}
+
+// Set transcription intent instead of model
+func WithIntent() ConnectOption {
+	return func(opts *connectOption) {
+		opts.intent = "transcription"
 	}
 }
 
@@ -103,7 +112,14 @@ func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, err
 	headers := c.getHeaders()
 
 	// get url by model
-	url := c.getURL(connectOpts.model)
+	var url string
+	if connectOpts.intent == "" {
+		url = c.getURL(connectOpts.model)
+	} else if c.config.APIType != APITypeOpenAI {
+		return nil, fmt.Errorf("Azure API type with intent set not implemented");
+	} else {
+		url = c.config.BaseURL + "?" + "intent=" + connectOpts.intent
+	}
 
 	// dial
 	conn, err := connectOpts.dialer.Dial(ctx, url, headers)

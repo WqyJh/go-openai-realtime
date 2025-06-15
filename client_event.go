@@ -6,15 +6,16 @@ import "encoding/json"
 type ClientEventType string
 
 const (
-	ClientEventTypeSessionUpdate            ClientEventType = "session.update"
-	ClientEventTypeInputAudioBufferAppend   ClientEventType = "input_audio_buffer.append"
-	ClientEventTypeInputAudioBufferCommit   ClientEventType = "input_audio_buffer.commit"
-	ClientEventTypeInputAudioBufferClear    ClientEventType = "input_audio_buffer.clear"
-	ClientEventTypeConversationItemCreate   ClientEventType = "conversation.item.create"
-	ClientEventTypeConversationItemTruncate ClientEventType = "conversation.item.truncate"
-	ClientEventTypeConversationItemDelete   ClientEventType = "conversation.item.delete"
-	ClientEventTypeResponseCreate           ClientEventType = "response.create"
-	ClientEventTypeResponseCancel           ClientEventType = "response.cancel"
+	ClientEventTypeSessionUpdate              ClientEventType = "session.update"
+	ClientEventTypeTranscriptionSessionUpdate ClientEventType = "transcription_session.update"
+	ClientEventTypeInputAudioBufferAppend     ClientEventType = "input_audio_buffer.append"
+	ClientEventTypeInputAudioBufferCommit     ClientEventType = "input_audio_buffer.commit"
+	ClientEventTypeInputAudioBufferClear      ClientEventType = "input_audio_buffer.clear"
+	ClientEventTypeConversationItemCreate     ClientEventType = "conversation.item.create"
+	ClientEventTypeConversationItemTruncate   ClientEventType = "conversation.item.truncate"
+	ClientEventTypeConversationItemDelete     ClientEventType = "conversation.item.delete"
+	ClientEventTypeResponseCreate             ClientEventType = "response.create"
+	ClientEventTypeResponseCancel             ClientEventType = "response.cancel"
 )
 
 // ClientEvent is the interface for client event.
@@ -68,6 +69,57 @@ func (m SessionUpdateEvent) ClientEventType() ClientEventType {
 
 func (m SessionUpdateEvent) MarshalJSON() ([]byte, error) {
 	type sessionUpdateEvent SessionUpdateEvent
+	v := struct {
+		*sessionUpdateEvent
+		Type ClientEventType `json:"type"`
+	}{
+		sessionUpdateEvent: (*sessionUpdateEvent)(&m),
+		Type:               m.ClientEventType(),
+	}
+	return json.Marshal(v)
+}
+
+type NoiseReductionType string
+
+const (
+	NearFieldNoiseReduction NoiseReductionType = "near_field"
+	FarFieldNoiseReduction  NoiseReductionType = "far_field"
+)
+
+type InputAudioNoiseReduction struct {
+	// Type of noise reduction. near_field is for close-talking microphones such as headphones, far_field is for far-field microphones such as laptop or conference room microphones.
+	Type NoiseReductionType `json:"type"`
+}
+
+type ClientTranscriptionSession struct {
+	Include []string `json:"include,omitempty"`
+	// The set of modalities the model can respond with. To disable audio, set this to ["text"].
+	Modalities []Modality `json:"modalities,omitempty"`
+	// The format of input audio. Options are "pcm16", "g711_ulaw", or "g711_alaw".
+	InputAudioFormat AudioFormat `json:"input_audio_format,omitempty"`
+	// Configuration for input audio noise reduction. This can be set to null to turn off. Noise reduction filters audio added to the input audio buffer before it is sent to VAD and the model. Filtering the audio can improve VAD and turn detection accuracy (reducing false positives) and model performance by improving perception of the input audio.
+	InputAudioNoiseReduction *InputAudioNoiseReduction `json:"input_audio_noise_reduction,omitempty"`
+	// Configuration for input audio transcription. Can be set to `nil` to turn off.
+	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
+	// Configuration for turn detection. Can be set to `nil` to turn off.
+	TurnDetection *ClientTurnDetection `json:"turn_detection"`
+}
+
+// SessionUpdateEvent is the event for session update.
+// Send this event to update the session’s default configuration.
+// See https://platform.openai.com/docs/api-reference/realtime-client-events/session/update
+type TranscriptionSessionUpdateEvent struct {
+	EventBase
+	// Session configuration to update.
+	Session ClientTranscriptionSession `json:"session"`
+}
+
+func (m TranscriptionSessionUpdateEvent) ClientEventType() ClientEventType {
+	return ClientEventTypeTranscriptionSessionUpdate
+}
+
+func (m TranscriptionSessionUpdateEvent) MarshalJSON() ([]byte, error) {
+	type sessionUpdateEvent TranscriptionSessionUpdateEvent
 	v := struct {
 		*sessionUpdateEvent
 		Type ClientEventType `json:"type"`

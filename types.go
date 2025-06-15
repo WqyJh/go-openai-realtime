@@ -123,7 +123,11 @@ const (
 
 type InputAudioTranscription struct {
 	// The model used for transcription.
-	Model string `json:"model"`
+	Model    string `json:"model"`
+	// The language of the input audio. Supplying the input language in ISO-639-1 (e.g. en) format will improve accuracy and latency.
+	Language string `json:"language,omitempty"`
+	// An optional text to guide the model's style or continue a previous audio segment. For whisper-1, the prompt is a list of keywords. For gpt-4o-transcribe models, the prompt is a free text string, for example "expect words related to technology".
+	Prompt   string `json:"prompt,omitempty"`
 }
 
 type Tool struct {
