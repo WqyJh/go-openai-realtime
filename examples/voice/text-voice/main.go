@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/WqyJh/go-openai-realtime/examples/voice/pcm"
 	openairt "github.com/WqyJh/go-openai-realtime/v2"
+	"github.com/WqyJh/go-openai-realtime/v2/examples/voice/pcm"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 )
@@ -119,10 +119,10 @@ func main() {
 		Session: openairt.SessionUnion{
 			Realtime: &openairt.RealtimeSession{
 				OutputModalities: []openairt.Modality{openairt.ModalityAudio},
-				Audio: openairt.RealtimeSessionAudio{
+				Audio: &openairt.RealtimeSessionAudio{
 					Output: &openairt.SessionAudioOutput{
 						Voice: openairt.VoiceMarin,
-						Format: openairt.AudioFormatUnion{
+						Format: &openairt.AudioFormatUnion{
 							PCM: &openairt.AudioFormatPCM{
 								Rate: 24000,
 							},

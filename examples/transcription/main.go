@@ -10,9 +10,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/WqyJh/go-openai-realtime/examples/voice/pcm"
-	"github.com/WqyJh/go-openai-realtime/examples/voice/recorder"
 	openairt "github.com/WqyJh/go-openai-realtime/v2"
+	"github.com/WqyJh/go-openai-realtime/v2/examples/voice/pcm"
+	"github.com/WqyJh/go-openai-realtime/v2/examples/voice/recorder"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/gordonklaus/portaudio"
@@ -96,9 +96,9 @@ func main() {
 	err = conn.SendMessage(ctx, openairt.SessionUpdateEvent{
 		Session: openairt.SessionUnion{
 			Transcription: &openairt.TranscriptionSession{
-				Audio: openairt.TranscriptionSessionAudio{
+				Audio: &openairt.TranscriptionSessionAudio{
 					Input: &openairt.SessionAudioInput{
-						Transcription: openairt.AudioTranscription{
+						Transcription: &openairt.AudioTranscription{
 							Model: openairt.GPT4oMiniTranscribe,
 						},
 					},

@@ -1,10 +1,10 @@
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
-github.com/WqyJh/go-openai-realtime/v2 v2.0.0-beta h1:h89g0Fk56qp4VDn3IBtxoHlMrx11udy2NfVs29s5Ly0=
-github.com/WqyJh/go-openai-realtime/v2 v2.0.0-beta/go.mod h1:PtaGNBQBWzXEYku+1uW1WPhERbxkesou37xYS5XKvy0=
+github.com/WqyJh/go-openai-realtime/v2 v2.0.0-20251024121129-c3290b09cc8f h1:VkKWXzRPgQ1n/9egaHEJovX9eGIaNcDRc4dAepSIEBk=
+github.com/WqyJh/go-openai-realtime/v2 v2.0.0-20251024121129-c3290b09cc8f/go.mod h1:XdhntAObZhUOGQTV7JZEvRkt2T+VwyvSnYIDNigGsDs=
 github.com/WqyJh/jsontools v0.3.1 h1:zKT+DvxUSTji06ZcjsbQzZ48PycFZDI0OGATmmFhJ+U=
 github.com/WqyJh/jsontools v0.3.1/go.mod h1:Gk2OlyXjAJmYNZ0aUbEXGHq4I5ihGRjXxVuUprWtkss=
-github.com/coder/websocket v1.8.12 h1:5bUXkEPPIbewrnkU8LTCLVaxi4N4J8ahufH2vlo4NAo=
-github.com/coder/websocket v1.8.12/go.mod h1:LNVeNrXQZfe5qhS9ALED3uA+l5pPqvwXg3CKoDBB2gs=
+github.com/coder/websocket v1.8.14 h1:9L0p0iKiNOibykf283eHkKUHHrpG7f65OE3BhhO7v9g=
+github.com/coder/websocket v1.8.14/go.mod h1:NX3SzP+inril6yawo5CQXx8+fk145lPDC6pumgx0mVg=
 github.com/d4l3k/messagediff v1.2.2-0.20190829033028-7e0a312ae40b/go.mod h1:Oozbb1TVXFac9FtSIxHBMnBCq2qeH/2KkEQxENCrlLo=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
