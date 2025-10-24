@@ -19,6 +19,20 @@ This library provides unofficial Go clients for [OpenAI Realtime API](https://pl
 - gpt-4o-mini-realtime-preview
 - gpt-4o-mini-realtime-preview-2024-12-17
 
+
+## Migration
+
+OpenAI Realtime API GA was officially released on 2025-08-28, and it is not fully compatible with the Beta version.To address these breaking changes, 
+we need to develop a v2 version of go-openai-realtime.For details, refer to the [Beta to GA Migration Guide](https://platform.openai.com/docs/guides/realtime#beta-to-ga-migration).
+
+Please use `github.com/WqyJh/go-openai-realtime/v2` instead of `github.com/WqyJh/go-openai-realtime`, and update your code to adapt to the new API specifications.
+
+Note that the Realtime API Beta and Realtime Preview Models (e.g., gpt-4o-realtime-preview) will be shut down on 2026-02-27. After this date, 
+you will no longer be able to use these services or the v1 version of go-openai-realtime.
+
+The old v1 version of go-openai-realtime is available at [v1 branch](https://github.com/WqyJh/go-openai-realtime/tree/v1).
+
+
 ## Installation
 
 ```bash
