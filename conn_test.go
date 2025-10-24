@@ -56,7 +56,6 @@ func TestConnect(t *testing.T) {
 		dialFunc: func(_ context.Context, url string, header http.Header) (openairt.WebSocketConn, error) {
 			require.Equal(t, openairt.OpenaiRealtimeAPIURLv1+"?model="+model, url)
 			require.Equal(t, "Bearer "+token, header.Get("Authorization"))
-			require.Equal(t, "realtime=v1", header.Get("OpenAI-Beta"))
 			dialCalled = true
 			return &mockWebSocketConn{
 				readMessageFunc: func(_ context.Context) (openairt.MessageType, []byte, error) {

@@ -21,7 +21,6 @@ func TestClient(t *testing.T) {
 	require.Equal(t, OpenaiRealtimeAPIURLv1+"?model=test-model", url)
 	headers := client.getHeaders()
 	require.Equal(t, "Bearer "+mockToken, headers.Get("Authorization"))
-	require.Equal(t, "realtime=v1", headers.Get("OpenAI-Beta"))
 
 	azureURL := "wss://my-eastus2-openai-resource.openai.azure.com/openai/realtime"
 	config = DefaultAzureConfig(mockToken, azureURL)

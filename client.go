@@ -71,7 +71,6 @@ func (c *Client) getHeaders() http.Header {
 		headers.Set("api-key", c.config.authToken)
 	} else {
 		headers.Set("Authorization", "Bearer "+c.config.authToken)
-		headers.Set("OpenAI-Beta", "realtime=v1")
 	}
 	return headers
 }
