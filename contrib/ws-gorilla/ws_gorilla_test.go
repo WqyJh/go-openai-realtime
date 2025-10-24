@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
-	gorilla "github.com/WqyJh/go-openai-realtime/contrib/ws-gorilla"
-	test "github.com/WqyJh/go-openai-realtime/test"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
+	gorilla "github.com/WqyJh/go-openai-realtime/v2/contrib/ws-gorilla"
+	test "github.com/WqyJh/go-openai-realtime/v2/test"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/require"
 )

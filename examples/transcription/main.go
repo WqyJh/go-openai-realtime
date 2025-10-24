@@ -10,9 +10,9 @@ import (
 	"os"
 	"time"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
-	"github.com/WqyJh/go-openai-realtime/examples/voice/pcm"
-	"github.com/WqyJh/go-openai-realtime/examples/voice/recorder"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
+	"github.com/WqyJh/go-openai-realtime/v2/examples/voice/pcm"
+	"github.com/WqyJh/go-openai-realtime/v2/examples/voice/recorder"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/gordonklaus/portaudio"
@@ -31,10 +31,10 @@ func main() {
 	// Teletype response
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioTranscriptDelta:
+		case openairt.ServerEventTypeResponseOutputAudioTranscriptDelta:
 			// ignore
-		case openairt.ServerEventTypeResponseAudioTranscriptDone:
-			fmt.Printf("[response] %s\n", event.(openairt.ResponseAudioTranscriptDoneEvent).Transcript)
+		case openairt.ServerEventTypeResponseOutputAudioTranscriptDone:
+			fmt.Printf("[response] %s\n", event.(openairt.ResponseOutputAudioTranscriptDoneEvent).Transcript)
 		}
 	}
 
@@ -93,11 +93,16 @@ func main() {
 	connHandler := openairt.NewConnHandler(ctx, conn, logHandler, responseHandler, responseDeltaHandler)
 	connHandler.Start()
 
-	err = conn.SendMessage(ctx, openairt.TranscriptionSessionUpdateEvent{
-		Session: openairt.ClientTranscriptionSession{
-			Modalities: []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-			InputAudioTranscription: &openairt.InputAudioTranscription{
-				Model: openairt.GPT4oMiniTranscribe,
+	err = conn.SendMessage(ctx, openairt.SessionUpdateEvent{
+		Session: openairt.SessionUnion{
+			Transcription: &openairt.TranscriptionSession{
+				Audio: &openairt.TranscriptionSessionAudio{
+					Input: &openairt.SessionAudioInput{
+						Transcription: &openairt.AudioTranscription{
+							Model: openairt.GPT4oMiniTranscribe,
+						},
+					},
+				},
 			},
 		},
 	})

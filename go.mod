@@ -1,11 +1,10 @@
-module github.com/WqyJh/go-openai-realtime
+module github.com/WqyJh/go-openai-realtime/v2
 
 go 1.19
 
 require (
 	github.com/WqyJh/jsontools v0.3.1
 	github.com/coder/websocket v1.8.12
-	github.com/sashabaranov/go-openai v1.32.0
 	github.com/stretchr/testify v1.9.0
 )
 

@@ -6,16 +6,17 @@ import "encoding/json"
 type ClientEventType string
 
 const (
-	ClientEventTypeSessionUpdate              ClientEventType = "session.update"
-	ClientEventTypeTranscriptionSessionUpdate ClientEventType = "transcription_session.update"
-	ClientEventTypeInputAudioBufferAppend     ClientEventType = "input_audio_buffer.append"
-	ClientEventTypeInputAudioBufferCommit     ClientEventType = "input_audio_buffer.commit"
-	ClientEventTypeInputAudioBufferClear      ClientEventType = "input_audio_buffer.clear"
-	ClientEventTypeConversationItemCreate     ClientEventType = "conversation.item.create"
-	ClientEventTypeConversationItemTruncate   ClientEventType = "conversation.item.truncate"
-	ClientEventTypeConversationItemDelete     ClientEventType = "conversation.item.delete"
-	ClientEventTypeResponseCreate             ClientEventType = "response.create"
-	ClientEventTypeResponseCancel             ClientEventType = "response.cancel"
+	ClientEventTypeSessionUpdate            ClientEventType = "session.update"
+	ClientEventTypeInputAudioBufferAppend   ClientEventType = "input_audio_buffer.append"
+	ClientEventTypeInputAudioBufferCommit   ClientEventType = "input_audio_buffer.commit"
+	ClientEventTypeInputAudioBufferClear    ClientEventType = "input_audio_buffer.clear"
+	ClientEventTypeConversationItemCreate   ClientEventType = "conversation.item.create"
+	ClientEventTypeConversationItemRetrieve ClientEventType = "conversation.item.retrieve"
+	ClientEventTypeConversationItemTruncate ClientEventType = "conversation.item.truncate"
+	ClientEventTypeConversationItemDelete   ClientEventType = "conversation.item.delete"
+	ClientEventTypeResponseCreate           ClientEventType = "response.create"
+	ClientEventTypeResponseCancel           ClientEventType = "response.cancel"
+	ClientEventTypeOutputAudioBufferClear   ClientEventType = "output_audio_buffer.clear"
 )
 
 // ClientEvent is the interface for client event.
@@ -29,40 +30,15 @@ type EventBase struct {
 	EventID string `json:"event_id,omitempty"`
 }
 
-type ClientSession struct {
-	// The set of modalities the model can respond with. To disable audio, set this to ["text"].
-	Modalities []Modality `json:"modalities,omitempty"`
-	// The default system instructions prepended to model calls.
-	Instructions string `json:"instructions,omitempty"`
-	// The voice the model uses to respond - one of alloy, echo, or shimmer. Cannot be changed once the model has responded with audio at least once.
-	Voice Voice `json:"voice,omitempty"`
-	// The format of input audio. Options are "pcm16", "g711_ulaw", or "g711_alaw".
-	InputAudioFormat AudioFormat `json:"input_audio_format,omitempty"`
-	// The format of output audio. Options are "pcm16", "g711_ulaw", or "g711_alaw".
-	OutputAudioFormat AudioFormat `json:"output_audio_format,omitempty"`
-	// Configuration for input audio transcription. Can be set to `nil` to turn off.
-	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
-	// Configuration for turn detection. Can be set to `nil` to turn off.
-	TurnDetection *ClientTurnDetection `json:"turn_detection"`
-	// Tools (functions) available to the model.
-	Tools []Tool `json:"tools,omitempty"`
-	// How the model chooses tools. Options are "auto", "none", "required", or specify a function.
-	ToolChoice ToolChoiceInterface `json:"tool_choice,omitempty"`
-	// Sampling temperature for the model.
-	Temperature *float32 `json:"temperature,omitempty"`
-	// Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or "inf" for the maximum available tokens for a given model. Defaults to "inf".
-	MaxOutputTokens IntOrInf `json:"max_response_output_tokens,omitempty"`
-	// Configuration for input audio noise reduction. This can be set to null to turn off. Noise reduction filters audio added to the input audio buffer before it is sent to VAD and the model. Filtering the audio can improve VAD and turn detection accuracy (reducing false positives) and model performance by improving perception of the input audio.
-	InputAudioNoiseReduction *InputAudioNoiseReduction `json:"input_audio_noise_reduction,omitempty"`
-}
-
-// SessionUpdateEvent is the event for session update.
-// Send this event to update the session’s default configuration.
+// Send this event to update the session’s configuration. The client may send this event at any time to update any field except for voice and model. voice can be updated only if there have been no other audio outputs yet.
+//
+// When the server receives a session.update, it will respond with a session.updated event showing the full, effective configuration. Only the fields that are present in the session.update are updated. To clear a field like instructions, pass an empty string. To clear a field like tools, pass an empty array. To clear a field like turn_detection, pass null.//
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/session/update
 type SessionUpdateEvent struct {
 	EventBase
 	// Session configuration to update.
-	Session ClientSession `json:"session"`
+	Session SessionUnion `json:"session"`
 }
 
 func (m SessionUpdateEvent) ClientEventType() ClientEventType {
@@ -70,70 +46,31 @@ func (m SessionUpdateEvent) ClientEventType() ClientEventType {
 }
 
 func (m SessionUpdateEvent) MarshalJSON() ([]byte, error) {
-	type sessionUpdateEvent SessionUpdateEvent
-	v := struct {
-		*sessionUpdateEvent
+	type typeAlias SessionUpdateEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		sessionUpdateEvent: (*sessionUpdateEvent)(&m),
-		Type:               m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
 type NoiseReductionType string
 
 const (
-	NearFieldNoiseReduction NoiseReductionType = "near_field"
-	FarFieldNoiseReduction  NoiseReductionType = "far_field"
+	NoiseReductionNearField NoiseReductionType = "near_field"
+	NoiseReductionFarField  NoiseReductionType = "far_field"
 )
 
-type InputAudioNoiseReduction struct {
-	// Type of noise reduction. near_field is for close-talking microphones such as headphones, far_field is for far-field microphones such as laptop or conference room microphones.
-	Type NoiseReductionType `json:"type"`
-}
-
-type ClientTranscriptionSession struct {
-	Include []string `json:"include,omitempty"`
-	// The set of modalities the model can respond with. To disable audio, set this to ["text"].
-	Modalities []Modality `json:"modalities,omitempty"`
-	// The format of input audio. Options are "pcm16", "g711_ulaw", or "g711_alaw".
-	InputAudioFormat AudioFormat `json:"input_audio_format,omitempty"`
-	// Configuration for input audio noise reduction. This can be set to null to turn off. Noise reduction filters audio added to the input audio buffer before it is sent to VAD and the model. Filtering the audio can improve VAD and turn detection accuracy (reducing false positives) and model performance by improving perception of the input audio.
-	InputAudioNoiseReduction *InputAudioNoiseReduction `json:"input_audio_noise_reduction,omitempty"`
-	// Configuration for input audio transcription. Can be set to `nil` to turn off.
-	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
-	// Configuration for turn detection. Can be set to `nil` to turn off.
-	TurnDetection *ClientTurnDetection `json:"turn_detection"`
-}
-
-// SessionUpdateEvent is the event for session update.
-// Send this event to update the session’s default configuration.
-// See https://platform.openai.com/docs/api-reference/realtime-client-events/session/update
-type TranscriptionSessionUpdateEvent struct {
-	EventBase
-	// Session configuration to update.
-	Session ClientTranscriptionSession `json:"session"`
-}
-
-func (m TranscriptionSessionUpdateEvent) ClientEventType() ClientEventType {
-	return ClientEventTypeTranscriptionSessionUpdate
-}
-
-func (m TranscriptionSessionUpdateEvent) MarshalJSON() ([]byte, error) {
-	type sessionUpdateEvent TranscriptionSessionUpdateEvent
-	v := struct {
-		*sessionUpdateEvent
-		Type ClientEventType `json:"type"`
-	}{
-		sessionUpdateEvent: (*sessionUpdateEvent)(&m),
-		Type:               m.ClientEventType(),
-	}
-	return json.Marshal(v)
-}
-
-// InputAudioBufferAppendEvent is the event for input audio buffer append.
-// Send this event to append audio bytes to the input audio buffer.
+// Send this event to append audio bytes to the input audio buffer. The audio buffer is temporary storage you can write to and later commit. A "commit" will create a new user message item in the conversation history from the buffer content and clear the buffer. Input audio transcription (if enabled) will be generated when the buffer is committed.
+//
+// If VAD is enabled the audio buffer is used to detect speech and the server will decide when to commit. When Server VAD is disabled, you must commit the audio buffer manually. Input audio noise reduction operates on writes to the audio buffer.
+//
+// The client may choose how much audio to place in each event up to a maximum of 15 MiB, for example streaming smaller chunks from the client may allow the VAD to be more responsive. Unlike most other client events, the server will not send a confirmation response to this event.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/input_audio_buffer/append
 type InputAudioBufferAppendEvent struct {
 	EventBase
@@ -145,19 +82,22 @@ func (m InputAudioBufferAppendEvent) ClientEventType() ClientEventType {
 }
 
 func (m InputAudioBufferAppendEvent) MarshalJSON() ([]byte, error) {
-	type inputAudioBufferAppendEvent InputAudioBufferAppendEvent
-	v := struct {
-		*inputAudioBufferAppendEvent
+	type typeAlias InputAudioBufferAppendEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		inputAudioBufferAppendEvent: (*inputAudioBufferAppendEvent)(&m),
-		Type:                        m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-// InputAudioBufferCommitEvent is the event for input audio buffer commit.
-// Send this event to commit audio bytes to a user message.
+// Send this event to commit the user input audio buffer, which will create a new user message item in the conversation. This event will produce an error if the input audio buffer is empty. When in Server VAD mode, the client does not need to send this event, the server will commit the audio buffer automatically.
+//
+// Committing the input audio buffer will trigger input audio transcription (if enabled in session configuration), but it will not create a response from the model. The server will respond with an input_audio_buffer.committed event.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/input_audio_buffer/commit
 type InputAudioBufferCommitEvent struct {
 	EventBase
@@ -168,19 +108,20 @@ func (m InputAudioBufferCommitEvent) ClientEventType() ClientEventType {
 }
 
 func (m InputAudioBufferCommitEvent) MarshalJSON() ([]byte, error) {
-	type inputAudioBufferCommitEvent InputAudioBufferCommitEvent
-	v := struct {
-		*inputAudioBufferCommitEvent
+	type typeAlias InputAudioBufferCommitEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		inputAudioBufferCommitEvent: (*inputAudioBufferCommitEvent)(&m),
-		Type:                        m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-// InputAudioBufferClearEvent is the event for input audio buffer clear.
-// Send this event to clear the audio bytes in the buffer.
+// Send this event to clear the audio bytes in the buffer. The server will respond with an input_audio_buffer.cleared event.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/input_audio_buffer/clear
 type InputAudioBufferClearEvent struct {
 	EventBase
@@ -191,26 +132,54 @@ func (m InputAudioBufferClearEvent) ClientEventType() ClientEventType {
 }
 
 func (m InputAudioBufferClearEvent) MarshalJSON() ([]byte, error) {
-	type inputAudioBufferClearEvent InputAudioBufferClearEvent
-	v := struct {
-		*inputAudioBufferClearEvent
+	type typeAlias InputAudioBufferClearEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		inputAudioBufferClearEvent: (*inputAudioBufferClearEvent)(&m),
-		Type:                       m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-// ConversationItemCreateEvent is the event for conversation item create.
-// Send this event when adding an item to the conversation.
+// Send this event to clear the audio bytes in the buffer. The server will respond with an input_audio_buffer.cleared event.
+//
+// See https://platform.openai.com/docs/api-reference/realtime-client-events/output_audio_buffer/clear
+
+type OutputAudioBufferClearEvent struct {
+	EventBase
+}
+
+func (m OutputAudioBufferClearEvent) ClientEventType() ClientEventType {
+	return ClientEventTypeOutputAudioBufferClear
+}
+
+func (m OutputAudioBufferClearEvent) MarshalJSON() ([]byte, error) {
+	type typeAlias OutputAudioBufferClearEvent
+	type typeWrapper struct {
+		typeAlias
+		Type ClientEventType `json:"type"`
+	}
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
+}
+
+// Add a new Item to the Conversation's context, including messages, function calls, and function call responses. This event can be used both to populate a "history" of the conversation and to add new items mid-stream, but has the current limitation that it cannot populate assistant audio messages.
+//
+// If successful, the server will respond with a conversation.item.created event, otherwise an error event will be sent.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/create
 type ConversationItemCreateEvent struct {
 	EventBase
 	// The ID of the preceding item after which the new item will be inserted.
 	PreviousItemID string `json:"previous_item_id,omitempty"`
 	// The item to add to the conversation.
-	Item MessageItem `json:"item"`
+	Item MessageItemUnion `json:"item"`
 }
 
 func (m ConversationItemCreateEvent) ClientEventType() ClientEventType {
@@ -218,19 +187,50 @@ func (m ConversationItemCreateEvent) ClientEventType() ClientEventType {
 }
 
 func (m ConversationItemCreateEvent) MarshalJSON() ([]byte, error) {
-	type conversationItemCreateEvent ConversationItemCreateEvent
-	v := struct {
-		*conversationItemCreateEvent
+	type typeAlias ConversationItemCreateEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		conversationItemCreateEvent: (*conversationItemCreateEvent)(&m),
-		Type:                        m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-// ConversationItemTruncateEvent is the event for conversation item truncate.
-// Send this event when you want to truncate a previous assistant message’s audio.
+// Send this event when you want to retrieve the server's representation of a specific item in the conversation history. This is useful, for example, to inspect user audio after noise cancellation and VAD. The server will respond with a conversation.item.retrieved event, unless the item does not exist in the conversation history, in which case the server will respond with an error.
+//
+// See https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/retrieve
+type ConversationItemRetrieveEvent struct {
+	EventBase
+	// The ID of the item to retrieve.
+	ItemID string `json:"item_id"`
+}
+
+func (m ConversationItemRetrieveEvent) ClientEventType() ClientEventType {
+	return ClientEventTypeConversationItemRetrieve
+}
+
+func (m ConversationItemRetrieveEvent) MarshalJSON() ([]byte, error) {
+	type typeAlias ConversationItemRetrieveEvent
+	type typeWrapper struct {
+		typeAlias
+		Type ClientEventType `json:"type"`
+	}
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
+}
+
+// Send this event to truncate a previous assistant message’s audio. The server will produce audio faster than realtime, so this event is useful when the user interrupts to truncate audio that has already been sent to the client but not yet played. This will synchronize the server's understanding of the audio with the client's playback.
+//
+// Truncating audio will delete the server-side text transcript to ensure there is not text in the context that hasn't been heard by the user.
+//
+// If successful, the server will respond with a conversation.item.truncated event.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/truncate
 type ConversationItemTruncateEvent struct {
 	EventBase
@@ -247,19 +247,20 @@ func (m ConversationItemTruncateEvent) ClientEventType() ClientEventType {
 }
 
 func (m ConversationItemTruncateEvent) MarshalJSON() ([]byte, error) {
-	type conversationItemTruncateEvent ConversationItemTruncateEvent
-	v := struct {
-		*conversationItemTruncateEvent
+	type typeAlias ConversationItemTruncateEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		conversationItemTruncateEvent: (*conversationItemTruncateEvent)(&m),
-		Type:                          m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-// ConversationItemDeleteEvent is the event for conversation item delete.
-// Send this event when you want to remove any item from the conversation history.
+// Send this event when you want to remove any item from the conversation history. The server will respond with a conversation.item.deleted event, unless the item does not exist in the conversation history, in which case the server will respond with an error.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/delete
 type ConversationItemDeleteEvent struct {
 	EventBase
@@ -272,38 +273,30 @@ func (m ConversationItemDeleteEvent) ClientEventType() ClientEventType {
 }
 
 func (m ConversationItemDeleteEvent) MarshalJSON() ([]byte, error) {
-	type conversationItemDeleteEvent ConversationItemDeleteEvent
-	v := struct {
-		*conversationItemDeleteEvent
+	type typeAlias ConversationItemDeleteEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		conversationItemDeleteEvent: (*conversationItemDeleteEvent)(&m),
-		Type:                        m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-type ResponseCreateParams struct {
-	// The modalities for the response.
-	Modalities []Modality `json:"modalities,omitempty"`
-	// Instructions for the model.
-	Instructions string `json:"instructions,omitempty"`
-	// The voice the model uses to respond - one of alloy, echo, or shimmer.
-	Voice Voice `json:"voice,omitempty"`
-	// The format of output audio.
-	OutputAudioFormat AudioFormat `json:"output_audio_format,omitempty"`
-	// Tools (functions) available to the model.
-	Tools []Tool `json:"tools,omitempty"`
-	// How the model chooses tools.
-	ToolChoice ToolChoiceInterface `json:"tool_choice,omitempty"`
-	// Sampling temperature.
-	Temperature *float32 `json:"temperature,omitempty"`
-	// Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or "inf" for the maximum available tokens for a given model. Defaults to "inf".
-	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
-}
-
-// ResponseCreateEvent is the event for response create.
-// Send this event to trigger a response generation.
+// This event instructs the server to create a Response, which means triggering model inference. When in Server VAD mode, the server will create Responses automatically.
+//
+// A Response will include at least one Item, and may have two, in which case the second will be a function call. These Items will be appended to the conversation history by default.
+//
+// The server will respond with a response.created event, events for Items and content created, and finally a response.done event to indicate the Response is complete.
+//
+// The response.create event includes inference configuration like instructions and tools. If these are set, they will override the Session's configuration for this Response only.
+//
+// Responses can be created out-of-band of the default Conversation, meaning that they can have arbitrary input, and it's possible to disable writing the output to the Conversation. Only one Response can write to the default Conversation at a time, but otherwise multiple Responses can be created in parallel. The metadata field is a good way to disambiguate multiple simultaneous Responses.
+//
+// Clients can set conversation to none to create a Response that does not write to the default Conversation. Arbitrary input can be provided with the input field, which is an array accepting raw Items and references to existing Items.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/response/create
 type ResponseCreateEvent struct {
 	EventBase
@@ -316,19 +309,20 @@ func (m ResponseCreateEvent) ClientEventType() ClientEventType {
 }
 
 func (m ResponseCreateEvent) MarshalJSON() ([]byte, error) {
-	type responseCreateEvent ResponseCreateEvent
-	v := struct {
-		*responseCreateEvent
+	type typeAlias ResponseCreateEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		responseCreateEvent: (*responseCreateEvent)(&m),
-		Type:                m.ClientEventType(),
 	}
-	return json.Marshal(v)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }
 
-// ResponseCancelEvent is the event for response cancel.
-// Send this event to cancel an in-progress response.
+// Send this event to cancel an in-progress response. The server will respond with a response.done event with a status of response.status=cancelled. If there is no response to cancel, the server will respond with an error. It's safe to call response.cancel even if no response is in progress, an error will be returned the session will remain unaffected.
+//
 // See https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel
 type ResponseCancelEvent struct {
 	EventBase
@@ -341,18 +335,14 @@ func (m ResponseCancelEvent) ClientEventType() ClientEventType {
 }
 
 func (m ResponseCancelEvent) MarshalJSON() ([]byte, error) {
-	type responseCancelEvent ResponseCancelEvent
-	v := struct {
-		*responseCancelEvent
+	type typeAlias ResponseCancelEvent
+	type typeWrapper struct {
+		typeAlias
 		Type ClientEventType `json:"type"`
-	}{
-		responseCancelEvent: (*responseCancelEvent)(&m),
-		Type:                m.ClientEventType(),
 	}
-	return json.Marshal(v)
-}
-
-// MarshalClientEvent marshals the client event to JSON.
-func MarshalClientEvent(event ClientEvent) ([]byte, error) {
-	return json.Marshal(event)
+	shadow := typeWrapper{
+		typeAlias: typeAlias(m),
+		Type:      m.ClientEventType(),
+	}
+	return json.Marshal(shadow)
 }

@@ -1,16 +1,15 @@
-module github.com/WqyJh/go-openai-realtime/examples
+module github.com/WqyJh/go-openai-realtime/v2/examples
 
-go 1.19
+go 1.23
 
 require (
-	github.com/WqyJh/go-openai-realtime v0.3.5-0.20250208091501-af3079f3fb2b
+	github.com/WqyJh/go-openai-realtime/v2 v2.0.0-20251024121129-c3290b09cc8f
 	github.com/faiface/beep v1.1.0
 	github.com/gordonklaus/portaudio v0.0.0-20230709114228-aafa478834f5
-	github.com/sashabaranov/go-openai v1.32.0
 )
 
 require (
-	github.com/coder/websocket v1.8.12 // indirect
+	github.com/coder/websocket v1.8.14 // indirect
 	github.com/hajimehoshi/oto v0.7.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8 // indirect
@@ -19,4 +18,4 @@ require (
 	golang.org/x/sys v0.25.0 // indirect
 )
 
-replace github.com/WqyJh/go-openai-realtime => ../
+// replace github.com/WqyJh/go-openai-realtime/v2 => ../

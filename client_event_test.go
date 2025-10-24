@@ -4,58 +4,80 @@ import (
 	"encoding/json"
 	"testing"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
-	"github.com/sashabaranov/go-openai"
-	"github.com/sashabaranov/go-openai/jsonschema"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSessionUpdateEvent(t *testing.T) {
-	temperature := float32(0.5)
 	message := openairt.SessionUpdateEvent{
 		EventBase: openairt.EventBase{
 			EventID: "test-id",
 		},
-		Session: openairt.ClientSession{
-			Modalities:        []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-			Instructions:      "test-instructions",
-			Voice:             openairt.VoiceAlloy,
-			InputAudioFormat:  openairt.AudioFormatPcm16,
-			OutputAudioFormat: openairt.AudioFormatG711Ulaw,
-			InputAudioTranscription: &openairt.InputAudioTranscription{
-				Model: openai.Whisper1,
-			},
-			TurnDetection: &openairt.ClientTurnDetection{
-				Type: openairt.ClientTurnDetectionTypeServerVad,
-				TurnDetectionParams: openairt.TurnDetectionParams{
-					Threshold:         0.5,
-					PrefixPaddingMs:   1000,
-					SilenceDurationMs: 2000,
-				},
-			},
-			Tools: []openairt.Tool{
-				{
-					Type: openairt.ToolTypeFunction,
-					Name: "test-tool",
-					Parameters: jsonschema.Definition{
-						Type: "object",
-						Properties: map[string]jsonschema.Definition{
-							"location": {
-								Type: jsonschema.String,
+		Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				OutputModalities: []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
+				Instructions:     "test-instructions",
+				Audio: &openairt.RealtimeSessionAudio{
+					Input: &openairt.SessionAudioInput{
+						Format: &openairt.AudioFormatUnion{
+							PCM: &openairt.AudioFormatPCM{
+								Rate: 24000,
 							},
 						},
-						Required: []string{"location"},
+						Transcription: &openairt.AudioTranscription{
+							Model: openairt.Whisper1,
+						},
+						TurnDetection: &openairt.TurnDetectionUnion{
+							ServerVad: &openairt.ServerVad{
+								Threshold:         0.5,
+								PrefixPaddingMs:   1000,
+								SilenceDurationMs: 2000,
+							},
+						},
+					},
+					Output: &openairt.SessionAudioOutput{
+						Format: &openairt.AudioFormatUnion{
+							PCM: &openairt.AudioFormatPCM{
+								Rate: 24000,
+							},
+						},
+						Voice: openairt.VoiceAlloy,
 					},
 				},
-			},
-			ToolChoice: openairt.ToolChoice{
-				Type: openairt.ToolTypeFunction,
-				Function: openairt.ToolFunction{
-					Name: "test-tool",
+				Tools: []openairt.ToolUnion{
+					{
+						Function: &openairt.ToolFunction{
+							Name:        "display_color_palette",
+							Description: "Call this function when a user asks for a color palette.",
+							Parameters: map[string]any{
+								"type":   "object",
+								"strict": true,
+								"properties": map[string]any{
+									"theme": map[string]any{
+										"type":        "string",
+										"description": "Description of the theme for the color scheme.",
+									},
+									"colors": map[string]any{
+										"type":        "array",
+										"description": "Array of five hex color codes based on the theme.",
+										"items": map[string]any{
+											"type":        "string",
+											"description": "Hex color code",
+										},
+									},
+								},
+								"required": []string{"theme", "colors"},
+							},
+						},
+					},
 				},
+				ToolChoice: &openairt.ToolChoiceUnion{
+					Function: &openairt.ToolChoiceFunction{
+						Name: "display_color_palette",
+					},
+				},
+				MaxOutputTokens: 100,
 			},
-			Temperature:     &temperature,
-			MaxOutputTokens: 100,
 		},
 	}
 
@@ -63,125 +85,153 @@ func TestSessionUpdateEvent(t *testing.T) {
 	data, err := json.Marshal(message)
 	require.NoError(t, err)
 	expected := `{
-	"event_id": "test-id",
-	"session": {
-			"modalities": [
-					"text",
-					"audio"
-			],
-			"instructions": "test-instructions",
-			"voice": "alloy",
-			"input_audio_format": "pcm16",
-			"output_audio_format": "g711_ulaw",
-			"input_audio_transcription": {
-					"model": "whisper-1"
-			},
-			"turn_detection": {
-					"type": "server_vad",
-					"threshold": 0.5,
-					"prefix_padding_ms": 1000,
-					"silence_duration_ms": 2000
-			},
-			"tools": [
-					{
-							"type": "function",
-							"name": "test-tool",
-							"description": "",
-							"parameters": {
-									"type": "object",
-									"properties": {
-											"location": {
-													"type": "string"
-											}
-									},
-									"required": [
-											"location"
-									]
-							}
-					}
-			],
-			"tool_choice": {
-					"type": "function",
-					"function": {
-							"name": "test-tool"
-					}
-			},
-			"temperature": 0.5,
-			"max_response_output_tokens": 100
-	},
-	"type": "session.update"
+  "event_id": "test-id",
+  "session": {
+    "type": "realtime",
+    "output_modalities": ["text", "audio"],
+    "instructions": "test-instructions",
+    "audio": {
+      "input": {
+        "format": {
+          "type": "audio/pcm",
+          "rate": 24000
+        },
+        "transcription": {
+          "model": "whisper-1"
+        },
+        "turn_detection": {
+          "type": "server_vad",
+          "threshold": 0.5,
+          "prefix_padding_ms": 1000,
+          "silence_duration_ms": 2000
+        }
+      },
+      "output": {
+        "format": {
+          "type": "audio/pcm",
+          "rate": 24000
+        },
+        "voice": "alloy"
+      }
+    },
+    "tools": [
+      {
+        "type": "function",
+        "name": "display_color_palette",
+        "description": "Call this function when a user asks for a color palette.",
+        "parameters": {
+          "type": "object",
+          "strict": true,
+          "properties": {
+            "theme": {
+              "type": "string",
+              "description": "Description of the theme for the color scheme."
+            },
+            "colors": {
+              "type": "array",
+              "description": "Array of five hex color codes based on the theme.",
+              "items": {
+                "type": "string",
+                "description": "Hex color code"
+              }
+            }
+          },
+          "required": ["theme", "colors"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "function",
+	  "name": "display_color_palette"
+    },
+    "max_output_tokens": 100
+  },
+  "type": "session.update"
 }`
 	require.JSONEq(t, expected, string(data))
 
-	message.Session.MaxOutputTokens = 0
+	message.Session.Realtime.MaxOutputTokens = 0
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{
-		"event_id": "test-id",
-		"session": {
-				"modalities": [
-						"text",
-						"audio"
-				],
-				"instructions": "test-instructions",
-				"voice": "alloy",
-				"input_audio_format": "pcm16",
-				"output_audio_format": "g711_ulaw",
-				"input_audio_transcription": {
-						"model": "whisper-1"
-				},
-				"turn_detection": {
-						"type": "server_vad",
-						"threshold": 0.5,
-						"prefix_padding_ms": 1000,
-						"silence_duration_ms": 2000
-				},
-				"tools": [
-						{
-								"type": "function",
-								"name": "test-tool",
-								"description": "",
-								"parameters": {
-										"type": "object",
-										"properties": {
-												"location": {
-														"type": "string"
-												}
-										},
-										"required": [
-												"location"
-										]
-								}
-						}
-				],
-				"tool_choice": {
-						"type": "function",
-						"function": {
-								"name": "test-tool"
-						}
-				},
-				"temperature": 0.5
-		},
-		"type": "session.update"
-	}`
+  "event_id": "test-id",
+  "session": {
+    "type": "realtime",
+    "output_modalities": ["text", "audio"],
+    "instructions": "test-instructions",
+    "audio": {
+      "input": {
+        "format": {
+          "type": "audio/pcm",
+          "rate": 24000
+        },
+        "transcription": {
+          "model": "whisper-1"
+        },
+        "turn_detection": {
+          "type": "server_vad",
+          "threshold": 0.5,
+          "prefix_padding_ms": 1000,
+          "silence_duration_ms": 2000
+        }
+      },
+      "output": {
+        "format": {
+          "type": "audio/pcm",
+          "rate": 24000
+        },
+        "voice": "alloy"
+      }
+    },
+    "tools": [
+      {
+        "type": "function",
+        "name": "display_color_palette",
+        "description": "Call this function when a user asks for a color palette.",
+        "parameters": {
+          "type": "object",
+          "strict": true,
+          "properties": {
+            "theme": {
+              "type": "string",
+              "description": "Description of the theme for the color scheme."
+            },
+            "colors": {
+              "type": "array",
+              "description": "Array of five hex color codes based on the theme.",
+              "items": {
+                "type": "string",
+                "description": "Hex color code"
+              }
+            }
+          },
+          "required": ["theme", "colors"]
+        }
+      }
+    ],
+    "tool_choice": {
+      "type": "function",
+      "name": "display_color_palette"
+    }
+  },
+  "type": "session.update"
+}`
 	require.JSONEq(t, expected, string(data))
 }
 
 func TestSessionUpdateEventSimple(t *testing.T) {
-	temperature := float32(0.5)
 	message := openairt.SessionUpdateEvent{
-		Session: openairt.ClientSession{
-			Modalities:              []openairt.Modality{openairt.ModalityText},
-			Instructions:            "test-instructions",
-			Voice:                   openairt.VoiceAlloy,
-			InputAudioFormat:        openairt.AudioFormatPcm16,
-			OutputAudioFormat:       openairt.AudioFormatG711Ulaw,
-			InputAudioTranscription: nil,
-			TurnDetection:           nil,
-			Tools:                   nil,
-			ToolChoice:              nil,
-			Temperature:             &temperature,
-			MaxOutputTokens:         100,
+		Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				OutputModalities: []openairt.Modality{openairt.ModalityText},
+				Instructions:     "test-instructions",
+				Audio: &openairt.RealtimeSessionAudio{
+					Output: &openairt.SessionAudioOutput{
+						Voice: openairt.VoiceAlloy,
+					},
+				},
+				MaxOutputTokens: 100,
+			},
 		},
 	}
 
@@ -190,16 +240,17 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 	require.NoError(t, err)
 	expected := `{
 	"session": {
-			"modalities": [
+			"type": "realtime",
+			"output_modalities": [
 					"text"
 			],
 			"instructions": "test-instructions",
-			"voice": "alloy",
-			"input_audio_format": "pcm16",
-			"output_audio_format": "g711_ulaw",
-			"turn_detection": null,
-			"temperature": 0.5,
-			"max_response_output_tokens": 100
+			"audio": {
+					"output": {
+							"voice": "alloy"
+					}
+			},
+			"max_output_tokens": 100
 	},
 	"type": "session.update"
 }`
@@ -215,7 +266,7 @@ func TestInputAudioBufferAppendEvent(t *testing.T) {
 	expected := `{"audio":"test-audio","type":"input_audio_buffer.append"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","audio":"test-audio","type":"input_audio_buffer.append"}`
@@ -229,7 +280,7 @@ func TestInputAudioBufferCommitEvent(t *testing.T) {
 	expected := `{"type":"input_audio_buffer.commit"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"input_audio_buffer.commit"}`
@@ -243,7 +294,7 @@ func TestInputAudioBufferClearEvent(t *testing.T) {
 	expected := `{"type":"input_audio_buffer.clear"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"input_audio_buffer.clear"}`
@@ -253,15 +304,15 @@ func TestInputAudioBufferClearEvent(t *testing.T) {
 func TestConversationItemCreateEvent(t *testing.T) {
 	message := openairt.ConversationItemCreateEvent{
 		PreviousItemID: "test-previous-item-id",
-		Item: openairt.MessageItem{
-			ID:     "test-id",
-			Type:   openairt.MessageItemTypeMessage,
-			Status: openairt.ItemStatusCompleted,
-			Role:   openairt.MessageRoleUser,
-			Content: []openairt.MessageContentPart{
-				{Type: openairt.MessageContentTypeText, Text: "test-content"},
-				{Type: openairt.MessageContentTypeAudio, Audio: "test-audio"},
-				{Type: openairt.MessageContentTypeTranscript, Transcript: "test-transcript"},
+		Item: openairt.MessageItemUnion{
+			User: &openairt.MessageItemUser{
+				ID: "test-id",
+				Content: []openairt.MessageContentInput{
+					{Type: openairt.MessageContentTypeText, Text: "test-content"},
+					{Type: openairt.MessageContentTypeAudio, Audio: "test-audio"},
+					{Type: openairt.MessageContentTypeTranscript, Transcript: "test-transcript"},
+				},
+				Status: openairt.ItemStatusCompleted,
 			},
 		},
 	}
@@ -293,7 +344,7 @@ func TestConversationItemCreateEvent(t *testing.T) {
 }`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{
@@ -335,7 +386,7 @@ func TestConversationItemTruncateEvent(t *testing.T) {
 	expected := `{"item_id":"test-item-id","content_index":1,"audio_end_ms":2000,"type":"conversation.item.truncate"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","item_id":"test-item-id","content_index":1,"audio_end_ms":2000,"type":"conversation.item.truncate"}`
@@ -350,7 +401,7 @@ func TestConversationItemDeleteEvent(t *testing.T) {
 	expected := `{"item_id":"test-item-id","type":"conversation.item.delete"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","item_id":"test-item-id","type":"conversation.item.delete"}`
@@ -360,39 +411,83 @@ func TestConversationItemDeleteEvent(t *testing.T) {
 func TestResponseCreateEvent(t *testing.T) {
 	message := openairt.ResponseCreateEvent{
 		Response: openairt.ResponseCreateParams{
-			Modalities:        []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-			Instructions:      "test-instructions",
-			Voice:             openairt.VoiceAlloy,
-			OutputAudioFormat: openairt.AudioFormatG711Ulaw,
-			Tools:             nil,
-			ToolChoice:        openairt.ToolChoiceAuto,
-			Temperature:       nil,
-			MaxOutputTokens:   100,
+			Instructions:     "test-instructions",
+			Tools:            []openairt.ToolUnion{},
+			OutputModalities: []openairt.Modality{openairt.ModalityText},
+			Metadata: map[string]string{
+				"response_purpose": "summarization",
+			},
+			Conversation: "none",
+			Input: []openairt.MessageItemUnion{
+				{
+					User: &openairt.MessageItemUser{
+						Content: []openairt.MessageContentInput{
+							{
+								Type: openairt.MessageContentTypeInputText,
+								Text: "Summarize the above message in one sentence.",
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 	data, err := json.MarshalIndent(message, "", "\t")
 	require.NoError(t, err)
 	expected := `{
-	"response": {
-		"modalities": [
-				"text",
-				"audio"
-		],
-		"instructions": "test-instructions",
-		"voice": "alloy",
-		"output_audio_format": "g711_ulaw",
-		"tool_choice": "auto",
-		"max_output_tokens": 100
-	},
-	"type": "response.create"
+  "type": "response.create",
+  "response": {
+    "instructions": "test-instructions",
+    "conversation": "none",
+    "output_modalities": ["text"],
+    "metadata": {
+      "response_purpose": "summarization"
+    },
+    "input": [
+      {
+        "type": "message",
+        "role": "user",
+        "content": [
+          {
+            "type": "input_text",
+            "text": "Summarize the above message in one sentence."
+          }
+        ]
+      }
+    ]
+  }
 }`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	message.Response.MaxOutputTokens = openairt.Inf
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
-	expected = `{"event_id":"test-id","response":{"modalities":["text","audio"],"instructions":"test-instructions","voice":"alloy","output_audio_format":"g711_ulaw","tool_choice":"auto","max_output_tokens":"inf"},"type":"response.create"}`
+	expected = `{
+  "type": "response.create",
+  "event_id": "test-id",
+  "response": {
+    "instructions": "test-instructions",
+    "conversation": "none",
+    "output_modalities": ["text"],
+    "metadata": {
+      "response_purpose": "summarization"
+    },
+    "input": [
+      {
+        "type": "message",
+        "role": "user",
+        "content": [
+          {
+            "type": "input_text",
+            "text": "Summarize the above message in one sentence."
+          }
+        ]
+      }
+    ],
+	"max_output_tokens": "inf"
+  }
+}`
 	require.JSONEq(t, expected, string(data))
 }
 
@@ -405,7 +500,7 @@ func TestResponseCancelEvent(t *testing.T) {
 	expected := `{"response_id":"test-response-id","type":"response.cancel"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","response_id":"test-response-id","type":"response.cancel"}`

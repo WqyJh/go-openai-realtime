@@ -8,9 +8,20 @@ import (
 )
 
 const (
-	GPT4oRealtimePreview             = "gpt-4o-realtime-preview"
-	GPT4oRealtimePreview20241001     = "gpt-4o-realtime-preview-2024-10-01"
-	GPT4oRealtimePreview20241217     = "gpt-4o-realtime-preview-2024-12-17"
+	GPTRealtime             = "gpt-realtime"
+	GPTRealtime20250828     = "gpt-realtime-2025-08-28"
+	GPTRealtimeMini         = "gpt-realtime-mini"
+	GPTRealtimeMini20251006 = "gpt-realtime-mini-2025-10-06"
+
+	// Deprecated: shutdown date 2026-02-27.
+	GPT4oRealtimePreview = "gpt-4o-realtime-preview"
+	// Deprecated: shutdown date 2025-10-10.
+	GPT4oRealtimePreview20241001 = "gpt-4o-realtime-preview-2024-10-01"
+	// Deprecated: shutdown date 2026-02-27.
+	GPT4oRealtimePreview20241217 = "gpt-4o-realtime-preview-2024-12-17"
+	// Deprecated: shutdown date 2026-02-27.
+	GPT4oRealtimePreview20250603 = "gpt-4o-realtime-preview-2025-06-03"
+
 	GPT4oMiniRealtimePreview         = "gpt-4o-mini-realtime-preview"
 	GPT4oMiniRealtimePreview20241217 = "gpt-4o-mini-realtime-preview-2024-12-17"
 )
@@ -60,7 +71,6 @@ func (c *Client) getHeaders() http.Header {
 		headers.Set("api-key", c.config.authToken)
 	} else {
 		headers.Set("Authorization", "Bearer "+c.config.authToken)
-		headers.Set("OpenAI-Beta", "realtime=v1")
 	}
 	return headers
 }
@@ -149,22 +159,10 @@ func (c *Client) getAPIHeaders() http.Header {
 	return headers
 }
 
-func (c *Client) CreateSession(ctx context.Context, req *CreateSessionRequest) (*CreateSessionResponse, error) {
-	return HTTPDo[CreateSessionRequest, CreateSessionResponse](
+func (c *Client) CreateClientSecret(ctx context.Context, req *CreateClientSecretRequest) (*CreateClientSecretResponse, error) {
+	return HTTPDo[CreateClientSecretRequest, CreateClientSecretResponse](
 		ctx,
-		c.config.APIBaseURL+"/realtime/sessions",
-		req,
-		WithClient(c.config.HTTPClient),
-		WithMethod(http.MethodPost),
-		WithHeaders(c.getAPIHeaders()),
-	)
-}
-
-// CreateTranscriptionSession creates a new transcription session.
-func (c *Client) CreateTranscriptionSession(ctx context.Context, req *CreateTranscriptionSessionRequest) (*CreateTranscriptionSessionResponse, error) {
-	return HTTPDo[CreateTranscriptionSessionRequest, CreateTranscriptionSessionResponse](
-		ctx,
-		c.config.APIBaseURL+"/realtime/transcription_sessions",
+		c.config.APIBaseURL+"/realtime/client_secrets",
 		req,
 		WithClient(c.config.HTTPClient),
 		WithMethod(http.MethodPost),
