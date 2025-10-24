@@ -2,6 +2,7 @@ package openairt
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -504,7 +505,7 @@ func (m MessageItemUnion) MarshalJSON() ([]byte, error) {
 	case m.MCPApprovalRequest != nil:
 		return json.Marshal(m.MCPApprovalRequest)
 	default:
-		return nil, fmt.Errorf("unknown message item type")
+		return nil, errors.New("unknown message item type")
 	}
 }
 

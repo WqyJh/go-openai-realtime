@@ -54,7 +54,7 @@ type ErrorResponse struct { //nolint:errname // this is a http error response
 }
 
 func (e *ErrorResponse) Error() string {
-	return e.OpenAIError.Message
+	return e.Message
 }
 
 type httpOption struct {

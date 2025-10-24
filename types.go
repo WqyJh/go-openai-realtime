@@ -3,6 +3,7 @@ package openairt
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 )
 
@@ -43,7 +44,6 @@ const (
 type TurnDetectionType string
 
 const (
-	TurnDetectionTypeNone        TurnDetectionType = "none"
 	TurnDetectionTypeServerVad   TurnDetectionType = "server_vad"
 	TurnDetectionTypeSemanticVad TurnDetectionType = "semantic_vad"
 )
@@ -148,7 +148,7 @@ func (t *ToolChoiceUnion) UnmarshalJSON(data []byte) error {
 	var u typeStruct
 	if err := json.Unmarshal(data, &u); err != nil {
 		t.Mode = ToolChoiceMode(bytes.Trim(data, "\""))
-		return nil
+		return nil //nolint: nilerr // data is string instead of object
 	}
 	switch ToolChoiceType(u.Type) {
 	case ToolChoiceTypeFunction:
@@ -219,11 +219,11 @@ func (t MCPAllowedToolsUnion) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.Filter)
 }
 
-func (t *MCPAllowedToolsUnion) UnmarshalJSON(data []byte) (err error) {
+func (t *MCPAllowedToolsUnion) UnmarshalJSON(data []byte) error {
 	if isNull(data) {
 		return nil
 	}
-	if err = json.Unmarshal(data, &t.Filter); err == nil {
+	if err := json.Unmarshal(data, &t.Filter); err == nil {
 		return nil
 	}
 	return json.Unmarshal(data, &t.ToolNames)
@@ -252,11 +252,11 @@ func (t MCPToolRequireApprovalUnion) MarshalJSON() ([]byte, error) {
 	return json.Marshal(t.Setting)
 }
 
-func (t *MCPToolRequireApprovalUnion) UnmarshalJSON(data []byte) (err error) {
+func (t *MCPToolRequireApprovalUnion) UnmarshalJSON(data []byte) error {
 	if isNull(data) {
 		return nil
 	}
-	if err = json.Unmarshal(data, &t.Filter); err == nil {
+	if err := json.Unmarshal(data, &t.Filter); err == nil {
 		return nil
 	}
 	return json.Unmarshal(data, &t.Setting)
@@ -336,7 +336,7 @@ func (t ToolUnion) MarshalJSON() ([]byte, error) {
 	if t.MCP != nil {
 		return json.Marshal(t.MCP)
 	}
-	return nil, fmt.Errorf("no tool")
+	return nil, errors.New("no tool")
 }
 
 func (t *ToolUnion) UnmarshalJSON(data []byte) error {
@@ -406,7 +406,7 @@ func (t *TruncationUnion) UnmarshalJSON(data []byte) error {
 	var u typeStruct
 	if err := json.Unmarshal(data, &u); err != nil {
 		t.Strategy = TruncationStrategy(bytes.Trim(data, "\""))
-		return nil
+		return nil //nolint: nilerr // data is string instead of object
 	}
 	switch TruncationStrategy(u.Type) {
 	case TruncationStrategyRetentionRatio:
@@ -483,7 +483,7 @@ func (p AudioFormatPCM) AudioFormat() string {
 	return string(AudioFormatTypePCM)
 }
 
-func (p AudioFormatPCM) MarshalJSON() (data []byte, err error) {
+func (p AudioFormatPCM) MarshalJSON() ([]byte, error) {
 	type typeAlias AudioFormatPCM
 	type typeWrapper struct {
 		typeAlias
@@ -503,7 +503,7 @@ func (p AudioFormatPCMU) AudioFormat() string {
 	return string(AudioFormatTypePCMU)
 }
 
-func (p AudioFormatPCMU) MarshalJSON() (data []byte, err error) {
+func (p AudioFormatPCMU) MarshalJSON() ([]byte, error) {
 	type typeAlias AudioFormatPCMU
 	type typeWrapper struct {
 		typeAlias
@@ -523,7 +523,7 @@ func (p AudioFormatPCMA) AudioFormat() string {
 	return string(AudioFormatTypePCMA)
 }
 
-func (p AudioFormatPCMA) MarshalJSON() (data []byte, err error) {
+func (p AudioFormatPCMA) MarshalJSON() ([]byte, error) {
 	type typeAlias AudioFormatPCMA
 	type typeWrapper struct {
 		typeAlias
@@ -546,7 +546,7 @@ type AudioFormatUnion struct {
 	PCMA *AudioFormatPCMA `json:",omitzero,inline"`
 }
 
-func (r AudioFormatUnion) MarshalJSON() (data []byte, err error) {
+func (r AudioFormatUnion) MarshalJSON() ([]byte, error) {
 	if r.PCM != nil {
 		return json.Marshal(r.PCM)
 	}
@@ -556,7 +556,7 @@ func (r AudioFormatUnion) MarshalJSON() (data []byte, err error) {
 	if r.PCMA != nil {
 		return json.Marshal(r.PCMA)
 	}
-	return nil, fmt.Errorf("no audio format")
+	return nil, errors.New("no audio format")
 }
 
 func (r *AudioFormatUnion) UnmarshalJSON(data []byte) error {
@@ -618,7 +618,7 @@ func (r ServerVad) VadType() TurnDetectionType {
 	return TurnDetectionTypeServerVad
 }
 
-func (r ServerVad) MarshalJSON() (data []byte, err error) {
+func (r ServerVad) MarshalJSON() ([]byte, error) {
 	type typeAlias ServerVad
 	type typeWrapper struct {
 		typeAlias
@@ -646,7 +646,7 @@ func (r RealtimeSessionSemanticVad) VadType() TurnDetectionType {
 	return TurnDetectionTypeSemanticVad
 }
 
-func (r RealtimeSessionSemanticVad) MarshalJSON() (data []byte, err error) {
+func (r RealtimeSessionSemanticVad) MarshalJSON() ([]byte, error) {
 	type typeAlias RealtimeSessionSemanticVad
 	type typeWrapper struct {
 		typeAlias
@@ -667,14 +667,14 @@ type TurnDetectionUnion struct {
 	SemanticVad *RealtimeSessionSemanticVad `json:",omitzero,inline"`
 }
 
-func (r TurnDetectionUnion) MarshalJSON() (data []byte, err error) {
+func (r TurnDetectionUnion) MarshalJSON() ([]byte, error) {
 	if r.ServerVad != nil {
 		return json.Marshal(r.ServerVad)
 	}
 	if r.SemanticVad != nil {
 		return json.Marshal(r.SemanticVad)
 	}
-	return nil, fmt.Errorf("no turn detection")
+	return nil, errors.New("no turn detection")
 }
 
 func (r *TurnDetectionUnion) UnmarshalJSON(data []byte) error {
@@ -764,7 +764,7 @@ func (r PromptInputText) PromptInputType() PromptInputType {
 	return PromptInputTypeText
 }
 
-func (r PromptInputText) MarshalJSON() (data []byte, err error) {
+func (r PromptInputText) MarshalJSON() ([]byte, error) {
 	type typeAlias PromptInputText
 	type typeWrapper struct {
 		typeAlias
@@ -787,7 +787,7 @@ func (r PromptInputImage) PromptInputType() PromptInputType {
 	return PromptInputTypeImage
 }
 
-func (r PromptInputImage) MarshalJSON() (data []byte, err error) {
+func (r PromptInputImage) MarshalJSON() ([]byte, error) {
 	type typeAlias PromptInputImage
 	type typeWrapper struct {
 		typeAlias
@@ -811,7 +811,7 @@ func (r PromptInputFile) PromptInputType() PromptInputType {
 	return PromptInputTypeFile
 }
 
-func (r PromptInputFile) MarshalJSON() (data []byte, err error) {
+func (r PromptInputFile) MarshalJSON() ([]byte, error) {
 	type typeAlias PromptInputFile
 	type typeWrapper struct {
 		typeAlias
@@ -933,19 +933,7 @@ func (r RealtimeSession) Type() SessionType {
 	return SessionTypeRealtime
 }
 
-func MarshalJSONWithType[T any, D any](typ T, d D) (data []byte, err error) {
-	type typedT struct {
-		D    D `json:",inline"`
-		Type T `json:"type"`
-	}
-	shadow := typedT{
-		D:    d,
-		Type: typ,
-	}
-	return json.Marshal(shadow)
-}
-
-func (r RealtimeSession) MarshalJSON() (data []byte, err error) {
+func (r RealtimeSession) MarshalJSON() ([]byte, error) {
 	type typeAlias RealtimeSession
 	type typeWrapper struct {
 		typeAlias
@@ -984,7 +972,7 @@ func (r TranscriptionSession) Type() SessionType {
 	return SessionTypeTranscription
 }
 
-func (r TranscriptionSession) MarshalJSON() (data []byte, err error) {
+func (r TranscriptionSession) MarshalJSON() ([]byte, error) {
 	type typeAlias TranscriptionSession
 	type typeWrapper struct {
 		typeAlias
@@ -1005,14 +993,14 @@ type SessionUnion struct {
 	Transcription *TranscriptionSession `json:",omitzero,inline"`
 }
 
-func (r SessionUnion) MarshalJSON() (data []byte, err error) {
+func (r SessionUnion) MarshalJSON() ([]byte, error) {
 	if r.Realtime != nil {
 		return json.Marshal(r.Realtime)
 	}
 	if r.Transcription != nil {
 		return json.Marshal(r.Transcription)
 	}
-	return nil, fmt.Errorf("no session type")
+	return nil, errors.New("no session type")
 }
 
 func (r *SessionUnion) UnmarshalJSON(data []byte) error {

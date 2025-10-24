@@ -266,7 +266,7 @@ func TestInputAudioBufferAppendEvent(t *testing.T) {
 	expected := `{"audio":"test-audio","type":"input_audio_buffer.append"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","audio":"test-audio","type":"input_audio_buffer.append"}`
@@ -280,7 +280,7 @@ func TestInputAudioBufferCommitEvent(t *testing.T) {
 	expected := `{"type":"input_audio_buffer.commit"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"input_audio_buffer.commit"}`
@@ -294,7 +294,7 @@ func TestInputAudioBufferClearEvent(t *testing.T) {
 	expected := `{"type":"input_audio_buffer.clear"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","type":"input_audio_buffer.clear"}`
@@ -344,7 +344,7 @@ func TestConversationItemCreateEvent(t *testing.T) {
 }`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{
@@ -386,7 +386,7 @@ func TestConversationItemTruncateEvent(t *testing.T) {
 	expected := `{"item_id":"test-item-id","content_index":1,"audio_end_ms":2000,"type":"conversation.item.truncate"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","item_id":"test-item-id","content_index":1,"audio_end_ms":2000,"type":"conversation.item.truncate"}`
@@ -401,7 +401,7 @@ func TestConversationItemDeleteEvent(t *testing.T) {
 	expected := `{"item_id":"test-item-id","type":"conversation.item.delete"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","item_id":"test-item-id","type":"conversation.item.delete"}`
@@ -460,7 +460,7 @@ func TestResponseCreateEvent(t *testing.T) {
 }`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	message.Response.MaxOutputTokens = openairt.Inf
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
@@ -502,7 +502,7 @@ func TestResponseCancelEvent(t *testing.T) {
 	expected := `{"response_id":"test-response-id","type":"response.cancel"}`
 	require.JSONEq(t, expected, string(data))
 
-	message.EventBase.EventID = "test-id"
+	message.EventID = "test-id"
 	data, err = json.Marshal(message)
 	require.NoError(t, err)
 	expected = `{"event_id":"test-id","response_id":"test-response-id","type":"response.cancel"}`

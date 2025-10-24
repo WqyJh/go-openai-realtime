@@ -86,8 +86,8 @@ func TestUnmarshalCreateClientSecretResponseRealtime(t *testing.T) {
 	var resp CreateClientSecretResponse
 	err := json.Unmarshal([]byte(data), &resp)
 	require.NoError(t, err)
-	require.Equal(t, "ek_68f9c9627aa081919efa4dda52ac3c08", resp.ClientSecret.Value)
-	require.Equal(t, int64(1761201082), resp.ClientSecret.ExpiresAt)
+	require.Equal(t, "ek_68f9c9627aa081919efa4dda52ac3c08", resp.Value)
+	require.Equal(t, int64(1761201082), resp.ExpiresAt)
 	session := resp.Session.Realtime
 	require.Equal(t, "sess_CTizKRJmcL3l4dbpQ8qbI", session.ID)
 	require.Equal(t, "gpt-realtime-2025-08-28", session.Model)
@@ -98,14 +98,14 @@ func TestUnmarshalCreateClientSecretResponseRealtime(t *testing.T) {
 	require.Equal(t, "auto", session.Truncation.Strategy.TruncationStrategy())
 	vad := session.Audio.Input.TurnDetection.ServerVad
 	require.Equal(t, "server_vad", string(vad.VadType()))
-	require.Equal(t, 0.5, vad.Threshold)
+	require.InDelta(t, 0.5, vad.Threshold, 0.0001)
 	require.Equal(t, int64(300), vad.PrefixPaddingMs)
 	require.Equal(t, int64(200), vad.SilenceDurationMs)
 	require.True(t, vad.CreateResponse)
 	require.True(t, vad.InterruptResponse)
 	require.Equal(t, int(24000), session.Audio.Input.Format.PCM.Rate)
 	require.Equal(t, VoiceAlloy, session.Audio.Output.Voice)
-	require.Equal(t, float32(1.0), session.Audio.Output.Speed)
+	require.InDelta(t, float32(1.0), session.Audio.Output.Speed, 0.0001)
 	require.Equal(t, int(24000), session.Audio.Output.Format.PCM.Rate)
 }
 
@@ -147,8 +147,8 @@ func TestUnmarshalCreateClientSecretResponseTranscription(t *testing.T) {
 	var resp CreateClientSecretResponse
 	err := json.Unmarshal([]byte(data), &resp)
 	require.NoError(t, err)
-	require.Equal(t, "ek_68f9cf1281188191903f8dde88960d41", resp.ClientSecret.Value)
-	require.Equal(t, int64(1761202538), resp.ClientSecret.ExpiresAt)
+	require.Equal(t, "ek_68f9cf1281188191903f8dde88960d41", resp.Value)
+	require.Equal(t, int64(1761202538), resp.ExpiresAt)
 	session := resp.Session.Transcription
 	require.Equal(t, "sess_CTjMo5AmgZuoEWQTvyBqd", session.ID)
 	require.Equal(t, SessionTypeTranscription, session.Type())
@@ -159,6 +159,6 @@ func TestUnmarshalCreateClientSecretResponseTranscription(t *testing.T) {
 	require.Equal(t, int64(500), session.Audio.Input.TurnDetection.ServerVad.SilenceDurationMs)
 	require.Equal(t, NoiseReductionNearField, session.Audio.Input.NoiseReduction.Type)
 	require.Equal(t, TurnDetectionTypeServerVad, session.Audio.Input.TurnDetection.ServerVad.VadType())
-	require.Equal(t, 0.6, session.Audio.Input.TurnDetection.ServerVad.Threshold)
+	require.InDelta(t, 0.6, session.Audio.Input.TurnDetection.ServerVad.Threshold, 0.0001)
 	require.Equal(t, int(24000), session.Audio.Input.Format.PCM.Rate)
 }

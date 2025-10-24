@@ -15,8 +15,8 @@ func TestCreateRealtimeSession(t *testing.T) {
 		t.Skip("OPENAI_API_KEY is not set")
 	}
 	config := openairt.DefaultConfig(key)
-	if baseUrl := os.Getenv("OPENAI_BASE_URL"); baseUrl != "" {
-		config.BaseURL = baseUrl
+	if baseURL := os.Getenv("OPENAI_BASE_URL"); baseURL != "" {
+		config.BaseURL = baseURL
 	}
 	client := openairt.NewClientWithConfig(config)
 	session, err := client.CreateClientSecret(context.Background(), &openairt.CreateClientSecretRequest{
@@ -39,8 +39,8 @@ func TestCreateRealtimeSession(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	require.NotEmpty(t, session.ClientSecret.Value)
-	require.NotZero(t, session.ClientSecret.ExpiresAt)
+	require.NotEmpty(t, session.Value)
+	require.NotZero(t, session.ExpiresAt)
 	require.Equal(t, openairt.GPTRealtime20250828, session.Session.Realtime.Model)
 	require.Equal(t, "You are a friendly assistant.", session.Session.Realtime.Instructions)
 	t.Logf("session: %+v", session)
@@ -52,8 +52,8 @@ func TestCreateTranscriptionSession(t *testing.T) {
 		t.Skip("OPENAI_API_KEY is not set")
 	}
 	config := openairt.DefaultConfig(key)
-	if baseUrl := os.Getenv("OPENAI_BASE_URL"); baseUrl != "" {
-		config.BaseURL = baseUrl
+	if baseURL := os.Getenv("OPENAI_BASE_URL"); baseURL != "" {
+		config.BaseURL = baseURL
 	}
 	client := openairt.NewClientWithConfig(config)
 	session, err := client.CreateClientSecret(context.Background(), &openairt.CreateClientSecretRequest{
@@ -90,8 +90,8 @@ func TestCreateTranscriptionSession(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	require.NotEmpty(t, session.ClientSecret.Value)
-	require.NotZero(t, session.ClientSecret.ExpiresAt)
+	require.NotEmpty(t, session.Value)
+	require.NotZero(t, session.ExpiresAt)
 	require.Equal(t, "realtime.transcription_session", session.Session.Transcription.Object)
 	require.Equal(t, int(24000), session.Session.Transcription.Audio.Input.Format.PCM.Rate)
 	require.Equal(t, openairt.GPT4oTranscribe, session.Session.Transcription.Audio.Input.Transcription.Model)

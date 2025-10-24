@@ -13,13 +13,13 @@ const (
 	GPTRealtimeMini         = "gpt-realtime-mini"
 	GPTRealtimeMini20251006 = "gpt-realtime-mini-2025-10-06"
 
-	// Deprecated: shutdown date 2026-02-27
+	// Deprecated: shutdown date 2026-02-27.
 	GPT4oRealtimePreview = "gpt-4o-realtime-preview"
-	// Deprecated: shutdown date 2025-10-10
+	// Deprecated: shutdown date 2025-10-10.
 	GPT4oRealtimePreview20241001 = "gpt-4o-realtime-preview-2024-10-01"
-	// Deprecated: shutdown date 2026-02-27
+	// Deprecated: shutdown date 2026-02-27.
 	GPT4oRealtimePreview20241217 = "gpt-4o-realtime-preview-2024-12-17"
-	// Deprecated: shutdown date 2026-02-27
+	// Deprecated: shutdown date 2026-02-27.
 	GPT4oRealtimePreview20250603 = "gpt-4o-realtime-preview-2025-06-03"
 
 	GPT4oMiniRealtimePreview         = "gpt-4o-mini-realtime-preview"
