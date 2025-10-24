@@ -2,6 +2,7 @@ package openairt
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -26,7 +27,7 @@ func (c *Conn) SendMessageRaw(ctx context.Context, data []byte) error {
 
 // SendMessage sends a client event to the server.
 func (c *Conn) SendMessage(ctx context.Context, msg ClientEvent) error {
-	data, err := MarshalClientEvent(msg)
+	data, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}

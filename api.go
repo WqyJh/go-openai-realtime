@@ -9,13 +9,6 @@ import (
 	"net/http"
 )
 
-type CreateSessionRequest struct {
-	ClientSession
-
-	// The Realtime model used for this session.
-	Model string `json:"model"`
-}
-
 type ClientSecret struct {
 	// Ephemeral key usable in client environments to authenticate connections to the Realtime API. Use this in client-side environments rather than a standard API token, which should only be used server-side.
 	Value string `json:"value"`
@@ -23,51 +16,28 @@ type ClientSecret struct {
 	ExpiresAt int64 `json:"expires_at"`
 }
 
-type CreateSessionResponse struct {
-	ServerSession
+type ExpiresAfter struct {
+	// The anchor point for the client secret expiration, meaning that seconds will be added to the created_at time of the client secret to produce an expiration timestamp. Only created_at is currently supported.
+	Anchor string `json:"anchor,omitzero"`
 
-	// Ephemeral key returned by the API.
-	ClientSecret ClientSecret `json:"client_secret"`
+	// The number of seconds from the anchor point to the expiration. Select a value between 10 and 7200 (2 hours). This default to 600 seconds (10 minutes) if not specified.
+	Seconds int `json:"seconds,omitzero"`
 }
 
-// CreateTranscriptionSessionRequest is the request for creating a transcription session.
-type CreateTranscriptionSessionRequest struct {
-	// The set of items to include in the transcription.
-	Include []string `json:"include,omitempty"`
-	// The format of input audio. Options are "pcm16", "g711_ulaw", or "g711_alaw".
-	InputAudioFormat AudioFormat `json:"input_audio_format,omitempty"`
-	// Configuration for input audio noise reduction.
-	InputAudioNoiseReduction *InputAudioNoiseReduction `json:"input_audio_noise_reduction,omitempty"`
-	// Configuration for input audio transcription.
-	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
+type CreateClientSecretRequest struct {
+	// Configuration for the client secret expiration. Expiration refers to the time after which a client secret will no longer be valid for creating sessions. The session itself may continue after that time once started. A secret can be used to create multiple sessions until it expires.
+	ExpiresAfter ExpiresAfter `json:"expires_after,omitzero"`
 
-	// Attention: Keep this field empty! It's shocking that this field is documented but not supported.
-	// You may get error of "Unknown parameter: 'modalities'." if this field is not empty.
-	// Issue reported: https://community.openai.com/t/unknown-parameter-modalities-when-creating-transcriptionsessions/1150141/6
-	// Docs: https://platform.openai.com/docs/api-reference/realtime-sessions/create-transcription#realtime-sessions-create-transcription-modalities
-	// The set of modalities the model can respond with. To disable audio, set this to ["text"].
-	Modalities []Modality `json:"modalities,omitempty"`
-
-	// Configuration for turn detection.
-	TurnDetection *ClientTurnDetection `json:"turn_detection,omitempty"`
+	// Session configuration to use for the client secret. Choose either a realtime session or a transcription session.
+	Session SessionUnion `json:"session,omitzero"`
 }
 
-// CreateTranscriptionSessionResponse is the response from creating a transcription session.
-type CreateTranscriptionSessionResponse struct {
-	// The unique ID of the session.
-	ID string `json:"id"`
-	// The object type, must be "realtime.transcription_session".
-	Object string `json:"object"`
-	// The format of input audio.
-	InputAudioFormat AudioFormat `json:"input_audio_format,omitempty"`
-	// Configuration of the transcription model.
-	InputAudioTranscription *InputAudioTranscription `json:"input_audio_transcription,omitempty"`
-	// The set of modalities.
-	Modalities []Modality `json:"modalities,omitempty"`
-	// Configuration for turn detection.
-	TurnDetection *ServerTurnDetection `json:"turn_detection,omitempty"`
+type CreateClientSecretResponse struct {
 	// Ephemeral key returned by the API.
-	ClientSecret ClientSecret `json:"client_secret"`
+	ClientSecret
+
+	// Session configuration to use for the client secret. Choose either a realtime session or a transcription session.
+	Session SessionUnion `json:"session,omitzero"`
 }
 
 type OpenAIError struct {

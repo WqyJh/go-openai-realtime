@@ -9,27 +9,40 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateSession(t *testing.T) {
+func TestCreateRealtimeSession(t *testing.T) {
 	key := os.Getenv("OPENAI_API_KEY")
 	if key == "" {
 		t.Skip("OPENAI_API_KEY is not set")
 	}
-	client := openairt.NewClient(key)
-	session, err := client.CreateSession(context.Background(), &openairt.CreateSessionRequest{
-		Model: openairt.GPT4oRealtimePreview20241217,
-		ClientSession: openairt.ClientSession{
-			Modalities: []openairt.Modality{
-				openairt.ModalityAudio,
-				openairt.ModalityText,
+	config := openairt.DefaultConfig(key)
+	if baseUrl := os.Getenv("OPENAI_BASE_URL"); baseUrl != "" {
+		config.BaseURL = baseUrl
+	}
+	client := openairt.NewClientWithConfig(config)
+	session, err := client.CreateClientSecret(context.Background(), &openairt.CreateClientSecretRequest{
+		ExpiresAfter: openairt.ExpiresAfter{
+			Anchor:  "created_at",
+			Seconds: 600,
+		},
+		Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				Model: openairt.GPTRealtime20250828,
+				// If you specify ["audio", "text"], you'll get error `Invalid modalities: ['audio', 'text']. Supported combinations are: ['text'] and ['audio'].`
+				// That's because Realtime API GA no longer accepts both text and audio for the parameter.
+				// Just passing ["audio"] and you can receive transcription of the input/output audio
+				// See https://github.com/openai/openai-agents-python/issues/1771#issuecomment-3317018366.
+				// OutputModalities: []openairt.Modality{
+				// 	openairt.ModalityAudio,
+				// },
+				Instructions: "You are a friendly assistant.",
 			},
-			Instructions: "You are a friendly assistant.",
 		},
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, session.ClientSecret.Value)
 	require.NotZero(t, session.ClientSecret.ExpiresAt)
-	require.Equal(t, openairt.GPT4oRealtimePreview20241217, session.Model)
-	require.Equal(t, "You are a friendly assistant.", session.Instructions)
+	require.Equal(t, openairt.GPTRealtime20250828, session.Session.Realtime.Model)
+	require.Equal(t, "You are a friendly assistant.", session.Session.Realtime.Instructions)
 	t.Logf("session: %+v", session)
 }
 
@@ -38,41 +51,55 @@ func TestCreateTranscriptionSession(t *testing.T) {
 	if key == "" {
 		t.Skip("OPENAI_API_KEY is not set")
 	}
-	client := openairt.NewClient(key)
-	session, err := client.CreateTranscriptionSession(context.Background(), &openairt.CreateTranscriptionSessionRequest{
-		InputAudioFormat: openairt.AudioFormatPcm16,
-		InputAudioTranscription: &openairt.InputAudioTranscription{
-			Model:    openairt.GPT4oTranscribe,
-			Language: "en",
+	config := openairt.DefaultConfig(key)
+	if baseUrl := os.Getenv("OPENAI_BASE_URL"); baseUrl != "" {
+		config.BaseURL = baseUrl
+	}
+	client := openairt.NewClientWithConfig(config)
+	session, err := client.CreateClientSecret(context.Background(), &openairt.CreateClientSecretRequest{
+		ExpiresAfter: openairt.ExpiresAfter{
+			Anchor:  "created_at",
+			Seconds: 600,
 		},
-		InputAudioNoiseReduction: &openairt.InputAudioNoiseReduction{
-			Type: openairt.NearFieldNoiseReduction,
-		},
-		// Attention: Keep this field empty! It's shocking that this field is documented but not supported.
-		// Modalities: []openairt.Modality{
-		// 	openairt.ModalityText,
-		// },
-		TurnDetection: &openairt.ClientTurnDetection{
-			Type: openairt.ClientTurnDetectionTypeServerVad,
-			TurnDetectionParams: openairt.TurnDetectionParams{
-				Threshold:         0.6,
-				PrefixPaddingMs:   300,
-				SilenceDurationMs: 500,
+		Session: openairt.SessionUnion{
+			Transcription: &openairt.TranscriptionSession{
+				Audio: openairt.TranscriptionSessionAudio{
+					Input: &openairt.SessionAudioInput{
+						Format: openairt.AudioFormatUnion{
+							PCM: &openairt.AudioFormatPCM{
+								Rate: 24000,
+							},
+						},
+						Transcription: openairt.AudioTranscription{
+							Model:    openairt.GPT4oTranscribe,
+							Language: "en",
+						},
+						NoiseReduction: openairt.AudioNoiseReduction{
+							Type: openairt.NoiseReductionNearField,
+						},
+						TurnDetection: openairt.TurnDetectionUnion{
+							ServerVad: &openairt.ServerVad{
+								Threshold:         0.6,
+								PrefixPaddingMs:   300,
+								SilenceDurationMs: 500,
+							},
+						},
+					},
+				},
 			},
 		},
-		Include: []string{},
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, session.ClientSecret.Value)
 	require.NotZero(t, session.ClientSecret.ExpiresAt)
-	require.Equal(t, "realtime.transcription_session", session.Object)
-	require.Equal(t, openairt.AudioFormatPcm16, session.InputAudioFormat)
-	require.Equal(t, openairt.GPT4oTranscribe, session.InputAudioTranscription.Model)
-	require.Equal(t, "en", session.InputAudioTranscription.Language)
-	require.Equal(t, openairt.ServerTurnDetectionTypeServerVad, session.TurnDetection.Type)
-	require.InEpsilon(t, 0.6, session.TurnDetection.Threshold, 0.0001)
-	require.Equal(t, 300, session.TurnDetection.PrefixPaddingMs)
-	require.Equal(t, 500, session.TurnDetection.SilenceDurationMs)
-	require.Empty(t, session.Modalities)
+	require.Equal(t, "realtime.transcription_session", session.Session.Transcription.Object)
+	require.Equal(t, int(24000), session.Session.Transcription.Audio.Input.Format.PCM.Rate)
+	require.Equal(t, openairt.GPT4oTranscribe, session.Session.Transcription.Audio.Input.Transcription.Model)
+	require.Equal(t, "en", session.Session.Transcription.Audio.Input.Transcription.Language)
+	require.NotNil(t, session.Session.Transcription.Audio.Input.TurnDetection.ServerVad)
+	require.Nil(t, session.Session.Transcription.Audio.Input.TurnDetection.SemanticVad)
+	require.InEpsilon(t, 0.6, session.Session.Transcription.Audio.Input.TurnDetection.ServerVad.Threshold, 0.0001)
+	require.Equal(t, int64(300), session.Session.Transcription.Audio.Input.TurnDetection.ServerVad.PrefixPaddingMs)
+	require.Equal(t, int64(500), session.Session.Transcription.Audio.Input.TurnDetection.ServerVad.SilenceDurationMs)
 	t.Logf("transcription session: %+v", session)
 }
