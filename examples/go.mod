@@ -1,6 +1,6 @@
 module github.com/WqyJh/go-openai-realtime/v2/examples
 
-go 1.24
+go 1.23
 
 require (
 	github.com/WqyJh/go-openai-realtime/v2 v2.0.0-20251024121129-c3290b09cc8f

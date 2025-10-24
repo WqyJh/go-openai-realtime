@@ -1,6 +1,6 @@
 module github.com/WqyJh/go-openai-realtime/v2/contrib/ws-gorilla
 
-go 1.24
+go 1.19
 
 // replace github.com/WqyJh/go-openai-realtime/v2 => ../../
 
