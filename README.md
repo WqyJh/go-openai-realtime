@@ -1,22 +1,31 @@
 # OpenAI Realtime API SDK for Golang
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/WqyJh/go-openai-realtime.svg)](https://pkg.go.dev/github.com/WqyJh/go-openai-realtime)
-[![Go Report Card](https://goreportcard.com/badge/github.com/WqyJh/go-openai-realtime)](https://goreportcard.com/report/github.com/WqyJh/go-openai-realtime)
+[![Go Reference](https://pkg.go.dev/badge/github.com/WqyJh/go-openai-realtime/v2.svg)](https://pkg.go.dev/github.com/WqyJh/go-openai-realtime/v2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/WqyJh/go-openai-realtime/v2)](https://goreportcard.com/report/github.com/WqyJh/go-openai-realtime/v2)
 [![codecov](https://codecov.io/gh/WqyJh/go-openai-realtime/branch/main/graph/badge.svg?token=bCbIfHLIsW)](https://codecov.io/gh/WqyJh/go-openai-realtime)
 
-This library provides unofficial Go clients for [OpenAI Realtime API](https://platform.openai.com/docs/api-reference/realtime). We support all 9 client events and 28 server events.
+This library provides unofficial Go clients for [OpenAI Realtime API](https://platform.openai.com/docs/api-reference/realtime). We support all 11 client events and 40 server events (except for 3 WebRTC-Only events).
 
-[Model Support](https://platform.openai.com/docs/models/gpt-4o-realtime):
-- gpt-4o-realtime-preview
-- gpt-4o-realtime-preview-2024-10-01
+[Model Support](https://platform.openai.com/docs/models/gpt-realtime):
+
+- gpt-realtime
+- gpt-realtime-2025-08-28
+- gpt-realtime-mini
+- gpt-realtime-mini-2025-10-06
+- gpt-4o-realtime-preview (shutdown date 2026-02-27)
+- gpt-4o-realtime-preview-2024-10-01 (shutdown date 2025-10-10)
+- gpt-4o-realtime-preview-2024-12-17 (shutdown date 2026-02-27)
+- gpt-4o-realtime-preview-2025-06-03 (shutdown date 2026-02-27)
+- gpt-4o-mini-realtime-preview
+- gpt-4o-mini-realtime-preview-2024-12-17
 
 ## Installation
 
 ```bash
-go get github.com/WqyJh/go-openai-realtime
+go get github.com/WqyJh/go-openai-realtime/v2
 ```
 
-Currently, go-openai-realtime requires Go version 1.19 or greater.
+Currently, go-openai-realtime requires Go version 1.22 or greater.
 
 ## Usage
 
@@ -53,7 +62,7 @@ Switch to another websocket dialer [gorilla/websocket](https://github.com/gorill
 ```go
 import (
 	openairt "github.com/WqyJh/go-openai-realtime/v2"
-	gorilla "github.com/WqyJh/go-openai-realtime/contrib/ws-gorilla"
+	gorilla "github.com/WqyJh/go-openai-realtime/v2/contrib/ws-gorilla"
 )
 
 func main() {
@@ -79,9 +88,11 @@ import (
 
 func main() {
     err = conn.SendMessage(ctx, &openairt.SessionUpdateEvent{
-        Session: openairt.ClientSession{
-            Modalities: []openairt.Modality{openairt.ModalityText},
-        },
+        Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				OutputModalities: []openairt.Modality{openairt.ModalityText},
+			},
+		},
     })
 }
 ```
@@ -138,8 +149,8 @@ Based on the event type, you can get the event data by type assertion.
 	// Teletype response
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseTextDelta:
-			fmt.Printf(event.(openairt.ResponseTextDeltaEvent).Delta)
+		case openairt.ServerEventTypeResponseOutputTextDelta:
+			fmt.Printf(event.(openairt.ResponseOutputTextDeltaEvent).Delta)
 		}
 	}
 ```

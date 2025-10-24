@@ -17,17 +17,17 @@ func TestSessionUpdateEvent(t *testing.T) {
 			Realtime: &openairt.RealtimeSession{
 				OutputModalities: []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
 				Instructions:     "test-instructions",
-				Audio: openairt.RealtimeSessionAudio{
+				Audio: &openairt.RealtimeSessionAudio{
 					Input: &openairt.SessionAudioInput{
-						Format: openairt.AudioFormatUnion{
+						Format: &openairt.AudioFormatUnion{
 							PCM: &openairt.AudioFormatPCM{
 								Rate: 24000,
 							},
 						},
-						Transcription: openairt.AudioTranscription{
+						Transcription: &openairt.AudioTranscription{
 							Model: openairt.Whisper1,
 						},
-						TurnDetection: openairt.TurnDetectionUnion{
+						TurnDetection: &openairt.TurnDetectionUnion{
 							ServerVad: &openairt.ServerVad{
 								Threshold:         0.5,
 								PrefixPaddingMs:   1000,
@@ -36,7 +36,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 						},
 					},
 					Output: &openairt.SessionAudioOutput{
-						Format: openairt.AudioFormatUnion{
+						Format: &openairt.AudioFormatUnion{
 							PCM: &openairt.AudioFormatPCM{
 								Rate: 24000,
 							},
@@ -71,7 +71,7 @@ func TestSessionUpdateEvent(t *testing.T) {
 						},
 					},
 				},
-				ToolChoice: openairt.ToolChoiceUnion{
+				ToolChoice: &openairt.ToolChoiceUnion{
 					Function: &openairt.ToolChoiceFunction{
 						Name: "display_color_palette",
 					},
@@ -225,7 +225,7 @@ func TestSessionUpdateEventSimple(t *testing.T) {
 			Realtime: &openairt.RealtimeSession{
 				OutputModalities: []openairt.Modality{openairt.ModalityText},
 				Instructions:     "test-instructions",
-				Audio: openairt.RealtimeSessionAudio{
+				Audio: &openairt.RealtimeSessionAudio{
 					Output: &openairt.SessionAudioOutput{
 						Voice: openairt.VoiceAlloy,
 					},
@@ -438,7 +438,6 @@ func TestResponseCreateEvent(t *testing.T) {
   "type": "response.create",
   "response": {
     "instructions": "test-instructions",
-    "tools": [],
     "conversation": "none",
     "output_modalities": ["text"],
     "metadata": {
@@ -469,7 +468,6 @@ func TestResponseCreateEvent(t *testing.T) {
   "event_id": "test-id",
   "response": {
     "instructions": "test-instructions",
-    "tools": [],
     "conversation": "none",
     "output_modalities": ["text"],
     "metadata": {

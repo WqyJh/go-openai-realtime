@@ -69,7 +69,7 @@ const (
 
 type ToolChoiceFunction struct {
 	// The name of the function to call.
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 }
 
 func (t ToolChoiceFunction) ToolChoiceType() string {
@@ -91,10 +91,10 @@ func (t ToolChoiceFunction) MarshalJSON() ([]byte, error) {
 
 type ToolChoiceMCP struct {
 	// The label of the MCP server to use.
-	ServerLabel string `json:"server_label"`
+	ServerLabel string `json:"server_label,omitempty"`
 
 	// The name of the tool to call on the server.
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 }
 
 func (t ToolChoiceMCP) ToolChoiceType() string {
@@ -122,13 +122,13 @@ type ToolChoiceUnion struct {
 	// auto means the model can pick between generating a message or calling one or more tools.
 	//
 	// required means the model must call one or more tools.
-	Mode ToolChoiceMode `json:",inline,omitzero"`
+	Mode ToolChoiceMode `json:",omitempty"`
 
 	// Use this option to force the model to call a specific function.
-	Function *ToolChoiceFunction `json:",inline,omitzero"`
+	Function *ToolChoiceFunction `json:",omitempty"`
 
 	// Use this option to force the model to call a specific tool on a remote MCP server.
-	MCP *ToolChoiceMCP `json:",inline,omitzero"`
+	MCP *ToolChoiceMCP `json:",omitempty"`
 }
 
 func (t ToolChoiceUnion) MarshalJSON() ([]byte, error) {
@@ -198,18 +198,18 @@ func (t ToolFunction) MarshalJSON() ([]byte, error) {
 
 type MCPToolFilter struct {
 	// Indicates whether or not a tool modifies data or is read-only. If an MCP server is annotated with readOnlyHint, it will match this filter.
-	ReadOnly bool `json:"read_only,omitzero"`
+	ReadOnly bool `json:"read_only,omitempty"`
 
 	// List of allowed tool names.
-	ToolNames []string `json:"tool_names,omitzero"`
+	ToolNames []string `json:"tool_names,omitempty"`
 }
 
 type MCPAllowedToolsUnion struct {
 	// A string array of allowed tool names
-	ToolNames []string `json:",omitzero"`
+	ToolNames []string `json:",omitempty"`
 
 	// A filter object to specify which tools are allowed.
-	Filter *MCPToolFilter `json:",omitzero"`
+	Filter *MCPToolFilter `json:",omitempty"`
 }
 
 func (t MCPAllowedToolsUnion) MarshalJSON() ([]byte, error) {
@@ -231,18 +231,18 @@ func (t *MCPAllowedToolsUnion) UnmarshalJSON(data []byte) error {
 
 type MCPRequireApprovalFilter struct {
 	// A filter object to specify which tools are allowed.
-	Always MCPToolFilter `json:",omitzero"`
+	Always *MCPToolFilter `json:",omitempty"`
 
 	// A filter object to specify which tools are allowed.
-	Never MCPToolFilter `json:",omitzero"`
+	Never *MCPToolFilter `json:",omitempty"`
 }
 
 type MCPToolRequireApprovalUnion struct {
 	// Specify which of the MCP server's tools require approval. Can be always, never, or a filter object associated with tools that require approval.
-	Filter *MCPRequireApprovalFilter `json:",omitzero"`
+	Filter *MCPRequireApprovalFilter `json:",omitempty"`
 
 	// Specify a single approval policy for all tools. One of always or never. When set to always, all tools will require approval. When set to never, all tools will not require approval.
-	Setting string `json:",omitzero"`
+	Setting string `json:",omitempty"`
 }
 
 func (t MCPToolRequireApprovalUnion) MarshalJSON() ([]byte, error) {
@@ -264,25 +264,25 @@ func (t *MCPToolRequireApprovalUnion) UnmarshalJSON(data []byte) error {
 
 type ToolMCP struct {
 	// A label for this MCP server, used to identify it in tool calls.
-	ServerLabel string `json:"server_label,omitzero"`
+	ServerLabel string `json:"server_label,omitempty"`
 
 	// An OAuth access token that can be used with a remote MCP server, either with a custom MCP server URL or a service connector. Your application must handle the OAuth authorization flow and provide the token here.
-	Authorization string `json:"authorization,omitzero"`
+	Authorization string `json:"authorization,omitempty"`
 
 	// Optional description of the MCP server, used to provide more context.
-	ServerDescription string `json:"server_description,omitzero"`
+	ServerDescription string `json:"server_description,omitempty"`
 
 	// The URL for the MCP server. One of server_url or connector_id must be provided.
-	ServerURL string `json:"server_url,omitzero"`
+	ServerURL string `json:"server_url,omitempty"`
 
 	// List of allowed tool names or a filter object.
-	AllowedTools MCPAllowedToolsUnion `json:"allowed_tools,omitzero"`
+	AllowedTools *MCPAllowedToolsUnion `json:"allowed_tools,omitempty"`
 
 	// Optional HTTP headers to send to the MCP server. Use for authentication or other purposes.
-	Headers map[string]string `json:"headers,omitzero"`
+	Headers map[string]string `json:"headers,omitempty"`
 
 	// Specify which of the MCP server's tools require approval.
-	RequireApproval MCPToolRequireApprovalUnion `json:"require_approval,omitzero"`
+	RequireApproval *MCPToolRequireApprovalUnion `json:"require_approval,omitempty"`
 
 	// Identifier for service connectors, like those available in ChatGPT. One of server_url or connector_id must be provided. Learn more about service connectors here.
 	//
@@ -296,7 +296,7 @@ type ToolMCP struct {
 	// Outlook Calendar: connector_outlookcalendar
 	// Outlook Email: connector_outlookemail
 	// SharePoint: connector_sharepoint
-	ConnectorID string `json:"connector_id,omitzero"`
+	ConnectorID string `json:"connector_id,omitempty"`
 }
 
 func (t ToolMCP) ToolType() ToolType {
@@ -317,16 +317,16 @@ func (t ToolMCP) MarshalJSON() ([]byte, error) {
 }
 
 type TracingConfiguration struct {
-	GroupID      string `json:"group_id,omitzero"`
-	Metadata     any    `json:"metadata,omitzero"`
-	WorkflowName string `json:"workflow_name,omitzero"`
+	GroupID      string `json:"group_id,omitempty"`
+	Metadata     any    `json:"metadata,omitempty"`
+	WorkflowName string `json:"workflow_name,omitempty"`
 }
 
 type ToolUnion struct {
-	Function *ToolFunction `json:",omitzero,inline"`
+	Function *ToolFunction `json:",omitempty"`
 
 	// Give the model access to additional tools via remote Model Context Protocol (MCP) servers. Learn more about MCP.
-	MCP *ToolMCP `json:",omitzero,inline"`
+	MCP *ToolMCP `json:",omitempty"`
 }
 
 func (t ToolUnion) MarshalJSON() ([]byte, error) {
@@ -364,8 +364,8 @@ const (
 )
 
 type TracingUnion struct {
-	Mode          TracingMode          `json:",omitzero,inline"`
-	Configuration TracingConfiguration `json:",omitzero,inline"`
+	Mode          TracingMode           `json:",omitempty"`
+	Configuration *TracingConfiguration `json:",omitempty"`
 }
 
 type TruncationStrategy string
@@ -381,7 +381,7 @@ func (t TruncationStrategy) TruncationStrategy() string {
 }
 
 type RetentionRatioTruncation struct {
-	Ratio float32 `json:"retention_ratio,omitzero"`
+	Ratio float32 `json:"retention_ratio,omitempty"`
 }
 
 func (t RetentionRatioTruncation) TruncationStrategy() string {
@@ -389,8 +389,8 @@ func (t RetentionRatioTruncation) TruncationStrategy() string {
 }
 
 type TruncationUnion struct {
-	Strategy                 TruncationStrategy       `json:",omitzero,inline"`
-	RetentionRatioTruncation RetentionRatioTruncation `json:",omitzero,inline"`
+	Strategy                 TruncationStrategy        `json:",omitempty"`
+	RetentionRatioTruncation *RetentionRatioTruncation `json:",omitempty"`
 }
 
 const nullString = "null"
@@ -421,14 +421,14 @@ func (t *TruncationUnion) UnmarshalJSON(data []byte) error {
 
 type ResponseAudioOutput struct {
 	// The format of the output audio.
-	Format AudioFormatUnion `json:"format,omitzero"`
+	Format *AudioFormatUnion `json:"format,omitempty"`
 
 	// The voice the model uses to respond. Voice cannot be changed during the session once the model has responded with audio at least once. Current voice options are alloy, ash, ballad, coral, echo, sage, shimmer, verse, marin, and cedar. We recommend marin and cedar for best quality.
-	Voice Voice `json:"voice,omitzero"`
+	Voice Voice `json:"voice,omitempty"`
 }
 
 type ResponseAudio struct {
-	Output ResponseAudioOutput `json:"output,omitzero"`
+	Output *ResponseAudioOutput `json:"output,omitempty"`
 }
 
 type MessageRole string
@@ -476,7 +476,7 @@ const (
 // The PCM audio format. Only a 24kHz sample rate is supported.
 type AudioFormatPCM struct {
 	// The sample rate of the audio. Always 24000.
-	Rate int `json:"rate,omitzero"`
+	Rate int `json:"rate,omitempty"`
 }
 
 func (p AudioFormatPCM) AudioFormat() string {
@@ -487,7 +487,7 @@ func (p AudioFormatPCM) MarshalJSON() ([]byte, error) {
 	type typeAlias AudioFormatPCM
 	type typeWrapper struct {
 		typeAlias
-		Type string `json:"type,omitzero"`
+		Type string `json:"type,omitempty"`
 	}
 	return json.Marshal(typeWrapper{
 		typeAlias: typeAlias(p),
@@ -507,7 +507,7 @@ func (p AudioFormatPCMU) MarshalJSON() ([]byte, error) {
 	type typeAlias AudioFormatPCMU
 	type typeWrapper struct {
 		typeAlias
-		Type string `json:"type,omitzero"`
+		Type string `json:"type,omitempty"`
 	}
 	return json.Marshal(typeWrapper{
 		typeAlias: typeAlias(p),
@@ -527,7 +527,7 @@ func (p AudioFormatPCMA) MarshalJSON() ([]byte, error) {
 	type typeAlias AudioFormatPCMA
 	type typeWrapper struct {
 		typeAlias
-		Type string `json:"type,omitzero"`
+		Type string `json:"type,omitempty"`
 	}
 	return json.Marshal(typeWrapper{
 		typeAlias: typeAlias(p),
@@ -537,13 +537,13 @@ func (p AudioFormatPCMA) MarshalJSON() ([]byte, error) {
 
 type AudioFormatUnion struct {
 	// The PCM audio format. Only a 24kHz sample rate is supported.
-	PCM *AudioFormatPCM `json:",omitzero,inline"`
+	PCM *AudioFormatPCM `json:",omitempty"`
 
 	// The G.711 μ-law format.
-	PCMU *AudioFormatPCMU `json:",omitzero,inline"`
+	PCMU *AudioFormatPCMU `json:",omitempty"`
 
 	// The G.711 A-law format.
-	PCMA *AudioFormatPCMA `json:",omitzero,inline"`
+	PCMA *AudioFormatPCMA `json:",omitempty"`
 }
 
 func (r AudioFormatUnion) MarshalJSON() ([]byte, error) {
@@ -587,7 +587,7 @@ func (r *AudioFormatUnion) UnmarshalJSON(data []byte) error {
 
 type AudioNoiseReduction struct {
 	// Type of noise reduction. near_field is for close-talking microphones such as headphones, far_field is for far-field microphones such as laptop or conference room microphones.
-	Type NoiseReductionType `json:"type,omitzero"`
+	Type NoiseReductionType `json:"type,omitempty"`
 }
 
 type ServerVad struct {
@@ -596,22 +596,22 @@ type ServerVad struct {
 	// The timeout value will be applied after the last model response's audio has finished playing, i.e. it's set to the response.done time plus audio playback duration.
 	//
 	// An input_audio_buffer.timeout_triggered event (plus events associated with the Response) will be emitted when the timeout is reached. Idle timeout is currently only supported for server_vad mode.
-	IdleTimeoutMs int64 `json:"idle_timeout_ms,omitzero"`
+	IdleTimeoutMs int64 `json:"idle_timeout_ms,omitempty"`
 
 	// Whether or not to automatically generate a response when a VAD stop event occurs.
-	CreateResponse bool `json:"create_response,omitzero"`
+	CreateResponse bool `json:"create_response,omitempty"`
 
 	// Whether or not to automatically interrupt any ongoing response with output to the default conversation (i.e. conversation of auto) when a VAD start event occurs.
-	InterruptResponse bool `json:"interrupt_response,omitzero"`
+	InterruptResponse bool `json:"interrupt_response,omitempty"`
 
 	// Used only for server_vad mode. Amount of audio to include before the VAD detected speech (in milliseconds). Defaults to 300ms.
-	PrefixPaddingMs int64 `json:"prefix_padding_ms,omitzero"`
+	PrefixPaddingMs int64 `json:"prefix_padding_ms,omitempty"`
 
 	// Used only for server_vad mode. Duration of silence to detect speech stop (in milliseconds). Defaults to 500ms. With shorter values the model will respond more quickly, but may jump in on short pauses from the user.
-	SilenceDurationMs int64 `json:"silence_duration_ms,omitzero"`
+	SilenceDurationMs int64 `json:"silence_duration_ms,omitempty"`
 
 	// Used only for server_vad mode. Activation threshold for VAD (0.0 to 1.0), this defaults to 0.5. A higher threshold will require louder audio to activate the model, and thus might perform better in noisy environments.
-	Threshold float64 `json:"threshold,omitzero"`
+	Threshold float64 `json:"threshold,omitempty"`
 }
 
 func (r ServerVad) VadType() TurnDetectionType {
@@ -622,7 +622,7 @@ func (r ServerVad) MarshalJSON() ([]byte, error) {
 	type typeAlias ServerVad
 	type typeWrapper struct {
 		typeAlias
-		Type TurnDetectionType `json:"type,omitzero"`
+		Type TurnDetectionType `json:"type,omitempty"`
 	}
 	shadow := typeWrapper{
 		typeAlias: typeAlias(r),
@@ -633,13 +633,13 @@ func (r ServerVad) MarshalJSON() ([]byte, error) {
 
 type RealtimeSessionSemanticVad struct {
 	// Whether or not to automatically generate a response when a VAD stop event occurs.
-	CreateResponse bool `json:"create_response,omitzero"`
+	CreateResponse bool `json:"create_response,omitempty"`
 
 	// Whether or not to automatically interrupt any ongoing response with output to the default conversation (i.e. conversation of auto) when a VAD start event occurs.
-	InterruptResponse bool `json:"interrupt_response,omitzero"`
+	InterruptResponse bool `json:"interrupt_response,omitempty"`
 
 	// Used only for semantic_vad mode. The eagerness of the model to respond. low will wait longer for the user to continue speaking, high will respond more quickly. auto is the default and is equivalent to medium. low, medium, and high have max timeouts of 8s, 4s, and 2s respectively.
-	Eagerness string `json:"eagerness,omitzero"`
+	Eagerness string `json:"eagerness,omitempty"`
 }
 
 func (r RealtimeSessionSemanticVad) VadType() TurnDetectionType {
@@ -650,7 +650,7 @@ func (r RealtimeSessionSemanticVad) MarshalJSON() ([]byte, error) {
 	type typeAlias RealtimeSessionSemanticVad
 	type typeWrapper struct {
 		typeAlias
-		Type TurnDetectionType `json:"type,omitzero"`
+		Type TurnDetectionType `json:"type,omitempty"`
 	}
 	shadow := typeWrapper{
 		typeAlias: typeAlias(r),
@@ -661,10 +661,10 @@ func (r RealtimeSessionSemanticVad) MarshalJSON() ([]byte, error) {
 
 type TurnDetectionUnion struct {
 	// Server-side voice activity detection (VAD) which flips on when user speech is detected and off after a period of silence.
-	ServerVad *ServerVad `json:",omitzero,inline"`
+	ServerVad *ServerVad `json:",omitempty"`
 
 	// Server-side semantic turn detection which uses a model to determine when the user has finished speaking.
-	SemanticVad *RealtimeSessionSemanticVad `json:",omitzero,inline"`
+	SemanticVad *RealtimeSessionSemanticVad `json:",omitempty"`
 }
 
 func (r TurnDetectionUnion) MarshalJSON() ([]byte, error) {
@@ -697,45 +697,45 @@ func (r *TurnDetectionUnion) UnmarshalJSON(data []byte) error {
 
 type AudioTranscription struct {
 	// The language of the input audio. Supplying the input language in ISO-639-1 (e.g. en) format will improve accuracy and latency.
-	Language string `json:"language,omitzero"`
+	Language string `json:"language,omitempty"`
 
 	// An optional text to guide the model's style or continue a previous audio segment. For whisper-1, the prompt is a list of keywords. For gpt-4o-transcribe models (excluding gpt-4o-transcribe-diarize), the prompt is a free text string, for example "expect words related to technology".
-	Prompt string `json:"prompt,omitzero"`
+	Prompt string `json:"prompt,omitempty"`
 
 	// The model to use for transcription. Current options are whisper-1, gpt-4o-mini-transcribe, gpt-4o-transcribe, and gpt-4o-transcribe-diarize. Use gpt-4o-transcribe-diarize when you need diarization with speaker labels.
-	Model string `json:"model,omitzero"`
+	Model string `json:"model,omitempty"`
 }
 
 type SessionAudioInput struct {
-	Format AudioFormatUnion `json:"format,omitzero"`
+	Format *AudioFormatUnion `json:"format,omitempty"`
 
 	// Configuration for input audio noise reduction. This can be set to null to turn off. Noise reduction filters audio added to the input audio buffer before it is sent to VAD and the model. Filtering the audio can improve VAD and turn detection accuracy (reducing false positives) and model performance by improving perception of the input audio.
-	NoiseReduction AudioNoiseReduction `json:"noise_reduction,omitzero"`
+	NoiseReduction *AudioNoiseReduction `json:"noise_reduction,omitempty"`
 
 	// Configuration for input audio transcription, defaults to off and can be set to null to turn off once on. Input audio transcription is not native to the model, since the model consumes audio directly. Transcription runs asynchronously through the /audio/transcriptions endpoint and should be treated as guidance of input audio content rather than precisely what the model heard. The client can optionally set the language and prompt for transcription, these offer additional guidance to the transcription service.
-	TurnDetection TurnDetectionUnion `json:"turn_detection,omitzero"`
+	TurnDetection *TurnDetectionUnion `json:"turn_detection,omitempty"`
 
 	// Configuration for turn detection, ether Server VAD or Semantic VAD. This can be set to null to turn off, in which case the client must manually trigger model response.
 	//
 	// Server VAD means that the model will detect the start and end of speech based on audio volume and respond at the end of user speech.
 	//
 	// Semantic VAD is more advanced and uses a turn detection model (in conjunction with VAD) to semantically estimate whether the user has finished speaking, then dynamically sets a timeout based on this probability. For example, if user audio trails off with "uhhm", the model will score a low probability of turn end and wait longer for the user to continue speaking. This can be useful for more natural conversations, but may have a higher latency.
-	Transcription AudioTranscription `json:"transcription,omitzero"`
+	Transcription *AudioTranscription `json:"transcription,omitempty"`
 }
 
 type SessionAudioOutput struct {
-	Format AudioFormatUnion `json:"format,omitzero"`
-	Speed  float32          `json:"speed,omitzero"`
-	Voice  Voice            `json:"voice,omitzero"`
+	Format *AudioFormatUnion `json:"format,omitempty"`
+	Speed  float32           `json:"speed,omitempty"`
+	Voice  Voice             `json:"voice,omitempty"`
 }
 
 type RealtimeSessionAudio struct {
-	Input  *SessionAudioInput  `json:"input,omitzero"`
-	Output *SessionAudioOutput `json:"output,omitzero"`
+	Input  *SessionAudioInput  `json:"input,omitempty"`
+	Output *SessionAudioOutput `json:"output,omitempty"`
 }
 
 type TranscriptionSessionAudio struct {
-	Input *SessionAudioInput `json:"input,omitzero"`
+	Input *SessionAudioInput `json:"input,omitempty"`
 }
 
 type PromptInputType string
@@ -768,7 +768,7 @@ func (r PromptInputText) MarshalJSON() ([]byte, error) {
 	type typeAlias PromptInputText
 	type typeWrapper struct {
 		typeAlias
-		Type PromptInputType `json:"type,omitzero"`
+		Type PromptInputType `json:"type,omitempty"`
 	}
 	shadow := typeWrapper{
 		typeAlias: typeAlias(r),
@@ -778,9 +778,9 @@ func (r PromptInputText) MarshalJSON() ([]byte, error) {
 }
 
 type PromptInputImage struct {
-	Detail   ImageDetail `json:"detail,omitzero"`
-	FileID   string      `json:"file_id,omitzero"`
-	ImageURL string      `json:"image_url,omitzero"`
+	Detail   ImageDetail `json:"detail,omitempty"`
+	FileID   string      `json:"file_id,omitempty"`
+	ImageURL string      `json:"image_url,omitempty"`
 }
 
 func (r PromptInputImage) PromptInputType() PromptInputType {
@@ -791,7 +791,7 @@ func (r PromptInputImage) MarshalJSON() ([]byte, error) {
 	type typeAlias PromptInputImage
 	type typeWrapper struct {
 		typeAlias
-		Type PromptInputType `json:"type,omitzero"`
+		Type PromptInputType `json:"type,omitempty"`
 	}
 	shadow := typeWrapper{
 		typeAlias: typeAlias(r),
@@ -801,10 +801,10 @@ func (r PromptInputImage) MarshalJSON() ([]byte, error) {
 }
 
 type PromptInputFile struct {
-	FileID   string `json:"file_id,omitzero"`
-	FileData string `json:"file_data,omitzero"`
-	FileURL  string `json:"file_url,omitzero"`
-	Filename string `json:"filename,omitzero"`
+	FileID   string `json:"file_id,omitempty"`
+	FileData string `json:"file_data,omitempty"`
+	FileURL  string `json:"file_url,omitempty"`
+	Filename string `json:"filename,omitempty"`
 }
 
 func (r PromptInputFile) PromptInputType() PromptInputType {
@@ -815,7 +815,7 @@ func (r PromptInputFile) MarshalJSON() ([]byte, error) {
 	type typeAlias PromptInputFile
 	type typeWrapper struct {
 		typeAlias
-		Type PromptInputType `json:"type,omitzero"`
+		Type PromptInputType `json:"type,omitempty"`
 	}
 	shadow := typeWrapper{
 		typeAlias: typeAlias(r),
@@ -825,10 +825,10 @@ func (r PromptInputFile) MarshalJSON() ([]byte, error) {
 }
 
 type PromptVariableUnion struct {
-	String     string            `json:",omitzero,inline"`
-	InputText  *PromptInputText  `json:",omitzero,inline"`
-	InputImage *PromptInputImage `json:",omitzero,inline"`
-	InputFile  *PromptInputFile  `json:",omitzero,inline"`
+	String     string            `json:",omitempty"`
+	InputText  *PromptInputText  `json:",omitempty"`
+	InputImage *PromptInputImage `json:",omitempty"`
+	InputFile  *PromptInputFile  `json:",omitempty"`
 }
 
 type typeStruct struct {
@@ -860,13 +860,13 @@ func (u *PromptVariableUnion) UnmarshalJSON(data []byte) error {
 
 type PromptReference struct {
 	// The unique identifier of the prompt template to use.
-	ID string `json:"id,omitzero"`
+	ID string `json:"id,omitempty"`
 
 	// Optional version of the prompt template.
-	Version string `json:"version,omitzero"`
+	Version string `json:"version,omitempty"`
 
 	// Optional map of values to substitute in for variables in your prompt. The substitution values can either be strings, or other Response input types like images or files.
-	Variables map[string]PromptVariableUnion `json:"variables,omitzero"`
+	Variables map[string]PromptVariableUnion `json:"variables,omitempty"`
 }
 
 type SessionType string
@@ -878,16 +878,16 @@ const (
 
 type RealtimeSession struct {
 	// Unique identifier for the session that looks like sess_1234567890abcdef.
-	ID string `json:"id,omitzero"`
+	ID string `json:"id,omitempty"`
 
 	// Expiration timestamp for the session, in seconds since epoch.
-	ExpiresAt int64 `json:"expires_at,omitzero"`
+	ExpiresAt int64 `json:"expires_at,omitempty"`
 
 	// The object type. Always realtime.session.
-	Object string `json:"object,omitzero"`
+	Object string `json:"object,omitempty"`
 
 	// Configuration for input and output audio.
-	Audio RealtimeSessionAudio `json:"audio,omitzero"`
+	Audio *RealtimeSessionAudio `json:"audio,omitempty"`
 
 	// Additional fields to include in server outputs.
 	//
@@ -895,38 +895,38 @@ type RealtimeSession struct {
 	// transcription.
 	//
 	// Any of "item.input_audio_transcription.logprobs".
-	Include []string `json:"include,omitzero"`
+	Include []string `json:"include,omitempty"`
 
 	// The default system instructions (i.e. system message) prepended to model calls. This field allows the client to guide the model on desired responses. The model can be instructed on response content and format, (e.g. "be extremely succinct", "act friendly", "here are examples of good responses") and on audio behavior (e.g. "talk quickly", "inject emotion into your voice", "laugh frequently"). The instructions are not guaranteed to be followed by the model, but they provide guidance to the model on the desired behavior.
 	//
 	// Note that the server sets default instructions which will be used if this field is not set and are visible in the session.created event at the start of the session.
-	Instructions string `json:"instructions,omitzero"`
+	Instructions string `json:"instructions,omitempty"`
 
 	// Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or inf for the maximum available tokens for a given model. Defaults to inf.
-	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitzero"`
+	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
 
 	// The Realtime model used for this session.
-	Model string `json:"model,omitzero"`
+	Model string `json:"model,omitempty"`
 
 	// The set of modalities the model can respond with. It defaults to ["audio"], indicating that the model will respond with audio plus a transcript. ["text"] can be used to make the model respond with text only. It is not possible to request both text and audio at the same time.
-	OutputModalities []Modality `json:"output_modalities,omitzero"`
+	OutputModalities []Modality `json:"output_modalities,omitempty"`
 
 	// Reference to a prompt template and its variables.
-	Prompt PromptReference `json:"prompt,omitzero"`
+	Prompt *PromptReference `json:"prompt,omitempty"`
 
 	// How the model chooses tools. Provide one of the string modes or force a specific function/MCP tool.
-	ToolChoice ToolChoiceUnion `json:"tool_choice,omitzero"`
+	ToolChoice *ToolChoiceUnion `json:"tool_choice,omitempty"`
 
 	// Tools available to the model.
-	Tools []ToolUnion `json:"tools,omitzero"`
+	Tools []ToolUnion `json:"tools,omitempty"`
 
 	// Realtime API can write session traces to the Traces Dashboard. Set to null to disable tracing. Once tracing is enabled for a session, the configuration cannot be modified.
 	//
 	// auto will create a trace for the session with default values for the workflow name, group id, and metadata.
-	Tracing TracingUnion `json:"tracing,omitzero"`
+	Tracing *TracingUnion `json:"tracing,omitempty"`
 
 	// Controls how the realtime conversation is truncated prior to model inference. The default is auto.
-	Truncation TruncationUnion `json:"truncation,omitzero"`
+	Truncation *TruncationUnion `json:"truncation,omitempty"`
 }
 
 func (r RealtimeSession) Type() SessionType {
@@ -948,16 +948,16 @@ func (r RealtimeSession) MarshalJSON() ([]byte, error) {
 
 type TranscriptionSession struct {
 	// Unique identifier for the session that looks like sess_1234567890abcdef.
-	ID string `json:"id,omitzero"`
+	ID string `json:"id,omitempty"`
 
 	// Expiration timestamp for the session, in seconds since epoch.
-	ExpiresAt int64 `json:"expires_at,omitzero"`
+	ExpiresAt int64 `json:"expires_at,omitempty"`
 
 	// The object type. Always realtime.transcription_session.
-	Object string `json:"object,omitzero"`
+	Object string `json:"object,omitempty"`
 
 	// Configuration for input audio.
-	Audio TranscriptionSessionAudio `json:"audio,omitzero"`
+	Audio *TranscriptionSessionAudio `json:"audio,omitempty"`
 
 	// Additional fields to include in server outputs.
 	//
@@ -965,7 +965,7 @@ type TranscriptionSession struct {
 	// transcription.
 	//
 	// Any of "item.input_audio_transcription.logprobs".
-	Include []string `json:"include,omitzero"`
+	Include []string `json:"include,omitempty"`
 }
 
 func (r TranscriptionSession) Type() SessionType {
@@ -987,10 +987,10 @@ func (r TranscriptionSession) MarshalJSON() ([]byte, error) {
 
 type SessionUnion struct {
 	// Realtime session object configuration.
-	Realtime *RealtimeSession `json:",omitzero,inline"`
+	Realtime *RealtimeSession `json:"realtime,omitempty"`
 
 	// Realtime transcription session object configuration.
-	Transcription *TranscriptionSession `json:",omitzero,inline"`
+	Transcription *TranscriptionSession `json:"transcription,omitempty"`
 }
 
 func (r SessionUnion) MarshalJSON() ([]byte, error) {
@@ -1059,10 +1059,10 @@ type CachedTokensDetails struct {
 }
 
 type InputTokenDetails struct {
-	CachedTokens        int                 `json:"cached_tokens"`
-	TextTokens          int                 `json:"text_tokens"`
-	AudioTokens         int                 `json:"audio_tokens"`
-	CachedTokensDetails CachedTokensDetails `json:"cached_tokens_details,omitempty"`
+	CachedTokens        int                  `json:"cached_tokens"`
+	TextTokens          int                  `json:"text_tokens"`
+	AudioTokens         int                  `json:"audio_tokens"`
+	CachedTokensDetails *CachedTokensDetails `json:"cached_tokens_details,omitempty"`
 }
 
 type OutputTokenDetails struct {
@@ -1075,9 +1075,9 @@ type TokenUsage struct {
 	InputTokens  int `json:"input_tokens"`
 	OutputTokens int `json:"output_tokens"`
 	// Input token details.
-	InputTokenDetails InputTokenDetails `json:"input_token_details,omitempty"`
+	InputTokenDetails *InputTokenDetails `json:"input_token_details,omitempty"`
 	// Output token details.
-	OutputTokenDetails OutputTokenDetails `json:"output_token_details,omitempty"`
+	OutputTokenDetails *OutputTokenDetails `json:"output_token_details,omitempty"`
 }
 
 func (u TokenUsage) UsageType() UsageType {
@@ -1093,8 +1093,8 @@ func (u DurationUsage) UsageType() UsageType {
 }
 
 type UsageUnion struct {
-	Tokens   TokenUsage    `json:",omitzero,inline"`
-	Duration DurationUsage `json:",omitzero,inline"`
+	Tokens   *TokenUsage    `json:",omitempty"`
+	Duration *DurationUsage `json:",omitempty"`
 }
 
 func (u *UsageUnion) UnmarshalJSON(data []byte) error {
@@ -1116,81 +1116,81 @@ func (u *UsageUnion) UnmarshalJSON(data []byte) error {
 }
 
 type StatusDetail struct {
-	Error  Error  `json:"error,omitempty"`
+	Error  *Error `json:"error,omitempty"`
 	Reason string `json:"reason,omitempty"`
 	Type   string `json:"type,omitempty"`
 }
 
 type ResponseCreateParams struct {
 	// Configuration for audio input and output.
-	Audio ResponseAudio `json:"audio,omitzero"`
+	Audio *ResponseAudio `json:"audio,omitempty"`
 
 	// Controls which conversation the response is added to. Currently supports auto and none, with auto as the default value. The auto value means that the contents of the response will be added to the default conversation. Set this to none to create an out-of-band response which will not add items to default conversation.
-	Conversation string `json:"conversation,omitzero"`
+	Conversation string `json:"conversation,omitempty"`
 
 	// Input items to include in the prompt for the model. Using this field creates a new context for this Response instead of using the default conversation. An empty array [] will clear the context for this Response. Note that this can include references to items that previously appeared in the session using their id.
-	Input []MessageItemUnion `json:"input,omitzero"`
+	Input []MessageItemUnion `json:"input,omitempty"`
 
 	// The default system instructions (i.e. system message) prepended to model calls. This field allows the client to guide the model on desired responses. The model can be instructed on response content and format, (e.g. "be extremely succinct", "act friendly", "here are examples of good responses") and on audio behavior (e.g. "talk quickly", "inject emotion into your voice", "laugh frequently"). The instructions are not guaranteed to be followed by the model, but they provide guidance to the model on the desired behavior. Note that the server sets default instructions which will be used if this field is not set and are visible in the session.created event at the start of the session.
-	Instructions string `json:"instructions,omitzero"`
+	Instructions string `json:"instructions,omitempty"`
 
 	// Maximum number of output tokens for a single assistant response, inclusive of tool calls. Provide an integer between 1 and 4096 to limit output tokens, or inf for the maximum available tokens for a given model. Defaults to inf.
-	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitzero"`
+	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
 
 	// Set of 16 key-value pairs that can be attached to an object. This can be useful for storing additional information about the object in a structured format, and querying for objects via API or the dashboard.
 	//
 	// Keys are strings with a maximum length of 64 characters. Values are strings with a maximum length of 512 characters.
-	Metadata map[string]string `json:"metadata,omitzero"`
+	Metadata map[string]string `json:"metadata,omitempty"`
 
 	// The set of modalities the model used to respond, currently the only possible values are [\"audio\"], [\"text\"]. Audio output always include a text transcript. Setting the output to mode text will disable audio output from the model.
-	OutputModalities []Modality `json:"output_modalities,omitzero"`
+	OutputModalities []Modality `json:"output_modalities,omitempty"`
 
 	// Reference to a prompt template and its variables.
 	//
 	// See https://platform.openai.com/docs/guides/text?api-mode=responses#reusable-prompts.
-	Prompt PromptReference `json:"prompt,omitzero"`
+	Prompt *PromptReference `json:"prompt,omitempty"`
 
 	// How the model chooses tools. Provide one of the string modes or force a specific function/MCP tool.
-	ToolChoice ToolChoiceUnion `json:"tool_choice,omitzero"`
+	ToolChoice *ToolChoiceUnion `json:"tool_choice,omitempty"`
 
 	// Tools available to the model.
-	Tools []ToolUnion `json:"tools,omitzero"`
+	Tools []ToolUnion `json:"tools,omitempty"`
 }
 
 type Response struct {
-	Audio ResponseAudio `json:"audio,omitzero"`
+	Audio *ResponseAudio `json:"audio,omitempty"`
 
-	ConversationID string `json:"conversation_id"`
+	ConversationID string `json:"conversation_id,omitempty"`
 
 	// The unique ID of the response.
 	ID string `json:"id"`
 
-	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitzero"`
+	MaxOutputTokens IntOrInf `json:"max_output_tokens,omitempty"`
 
-	Metadata map[string]string `json:"metadata,omitzero"`
+	Metadata map[string]string `json:"metadata,omitempty"`
 
 	// The object type, must be "realtime.response".
-	Object string `json:"object"`
+	Object string `json:"object,omitempty"`
 
-	Output []MessageItemUnion `json:"output"`
+	Output []MessageItemUnion `json:"output,omitempty"`
 
-	OutputModalities []Modality `json:"output_modalities,omitzero"`
+	OutputModalities []Modality `json:"output_modalities,omitempty"`
 
 	// The status of the response.
-	Status ResponseStatus `json:"status"`
+	Status ResponseStatus `json:"status,omitempty"`
 	// Additional details about the status.
-	StatusDetails StatusDetail `json:"status_details,omitempty"`
+	StatusDetails *StatusDetail `json:"status_details,omitempty"`
 
 	Usage *TokenUsage `json:"usage,omitempty"`
 }
 
 type RateLimit struct {
 	// The name of the rate limit ("requests", "tokens", "input_tokens", "output_tokens").
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 	// The maximum allowed value for the rate limit.
-	Limit int `json:"limit"`
+	Limit int `json:"limit,omitempty"`
 	// The remaining value before the limit is reached.
-	Remaining int `json:"remaining"`
+	Remaining int `json:"remaining,omitempty"`
 	// Seconds until the rate limit resets.
-	ResetSeconds float64 `json:"reset_seconds"`
+	ResetSeconds float64 `json:"reset_seconds,omitempty"`
 }

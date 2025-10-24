@@ -214,11 +214,13 @@ type ConversationItemRetrievedEvent struct {
 
 type Logprobs struct {
 	// Raw byte sequence corresponding to the token (if applicable).
-	Bytes []byte `json:"bytes,omitzero"`
+	Bytes []byte `json:"bytes,omitempty"`
+
 	// Log probability of the token or segment.
-	Logprob float64 `json:"logprob,omitzero"`
+	Logprob float64 `json:"logprob,omitempty"`
+
 	// The decoded token text.
-	Token string `json:"token,omitzero"`
+	Token string `json:"token,omitempty"`
 }
 
 // This event is the output of audio transcription for user audio written to the user audio buffer. Transcription begins when the input audio buffer is committed by the client or server (in `server_vad` mode). Transcription runs asynchronously with Response creation, so this event may come before or after the Response events.
@@ -238,10 +240,10 @@ type ConversationItemInputAudioTranscriptionCompletedEvent struct {
 	Transcript string `json:"transcript"`
 
 	// Log probability information for the transcription, if available.
-	Logprobs []Logprobs `json:"logprobs,omitzero"`
+	Logprobs []Logprobs `json:"logprobs,omitempty"`
 
 	// Usage information for the transcription, if available.
-	Usage *UsageUnion `json:"usage,omitzero"`
+	Usage *UsageUnion `json:"usage,omitempty"`
 }
 
 // Returned when the text value of an input audio transcription content part is updated with incremental transcription results.
@@ -259,7 +261,7 @@ type ConversationItemInputAudioTranscriptionDeltaEvent struct {
 	Delta string `json:"delta"`
 
 	// Log probability updates for the delta, if available.
-	Logprobs []Logprobs `json:"logprobs,omitzero"`
+	Logprobs []Logprobs `json:"logprobs,omitempty"`
 }
 
 // Returned when an input audio transcription segment is identified for an item.
@@ -274,22 +276,22 @@ type ConversationItemInputAudioTranscriptionSegmentEvent struct {
 	ContentIndex int `json:"content_index"`
 
 	// Log probability information for the segment, if available.
-	Logprobs []Logprobs `json:"logprobs,omitzero"`
+	Logprobs []Logprobs `json:"logprobs,omitempty"`
 
 	// The unique ID of the transcript segment.
-	ID string `json:"id,omitzero"`
+	ID string `json:"id,omitempty"`
 
 	// The speaker label for the segment, if available.
-	Speaker string `json:"speaker,omitzero"`
+	Speaker string `json:"speaker,omitempty"`
 
 	// The start time of the segment in seconds.
-	Start float64 `json:"start,omitzero"`
+	Start float64 `json:"start,omitempty"`
 
 	// The end time of the segment in seconds.
-	End float64 `json:"end,omitzero"`
+	End float64 `json:"end,omitempty"`
 
 	// The text content of the segment.
-	Text string `json:"text,omitzero"`
+	Text string `json:"text,omitempty"`
 }
 
 // Returned when input audio transcription is configured, and a transcription request for a user message failed. These events are separate from other error events so that the client can identify the related Item.

@@ -20,11 +20,11 @@ func TestCreateRealtimeSession(t *testing.T) {
 	}
 	client := openairt.NewClientWithConfig(config)
 	session, err := client.CreateClientSecret(context.Background(), &openairt.CreateClientSecretRequest{
-		ExpiresAfter: openairt.ExpiresAfter{
+		ExpiresAfter: &openairt.ExpiresAfter{
 			Anchor:  "created_at",
 			Seconds: 600,
 		},
-		Session: openairt.SessionUnion{
+		Session: &openairt.SessionUnion{
 			Realtime: &openairt.RealtimeSession{
 				Model: openairt.GPTRealtime20250828,
 				// If you specify ["audio", "text"], you'll get error `Invalid modalities: ['audio', 'text']. Supported combinations are: ['text'] and ['audio'].`
@@ -57,27 +57,27 @@ func TestCreateTranscriptionSession(t *testing.T) {
 	}
 	client := openairt.NewClientWithConfig(config)
 	session, err := client.CreateClientSecret(context.Background(), &openairt.CreateClientSecretRequest{
-		ExpiresAfter: openairt.ExpiresAfter{
+		ExpiresAfter: &openairt.ExpiresAfter{
 			Anchor:  "created_at",
 			Seconds: 600,
 		},
-		Session: openairt.SessionUnion{
+		Session: &openairt.SessionUnion{
 			Transcription: &openairt.TranscriptionSession{
-				Audio: openairt.TranscriptionSessionAudio{
+				Audio: &openairt.TranscriptionSessionAudio{
 					Input: &openairt.SessionAudioInput{
-						Format: openairt.AudioFormatUnion{
+						Format: &openairt.AudioFormatUnion{
 							PCM: &openairt.AudioFormatPCM{
 								Rate: 24000,
 							},
 						},
-						Transcription: openairt.AudioTranscription{
+						Transcription: &openairt.AudioTranscription{
 							Model:    openairt.GPT4oTranscribe,
 							Language: "en",
 						},
-						NoiseReduction: openairt.AudioNoiseReduction{
+						NoiseReduction: &openairt.AudioNoiseReduction{
 							Type: openairt.NoiseReductionNearField,
 						},
-						TurnDetection: openairt.TurnDetectionUnion{
+						TurnDetection: &openairt.TurnDetectionUnion{
 							ServerVad: &openairt.ServerVad{
 								Threshold:         0.6,
 								PrefixPaddingMs:   300,

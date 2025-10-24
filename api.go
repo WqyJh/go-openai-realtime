@@ -18,18 +18,18 @@ type ClientSecret struct {
 
 type ExpiresAfter struct {
 	// The anchor point for the client secret expiration, meaning that seconds will be added to the created_at time of the client secret to produce an expiration timestamp. Only created_at is currently supported.
-	Anchor string `json:"anchor,omitzero"`
+	Anchor string `json:"anchor,omitempty"`
 
 	// The number of seconds from the anchor point to the expiration. Select a value between 10 and 7200 (2 hours). This default to 600 seconds (10 minutes) if not specified.
-	Seconds int `json:"seconds,omitzero"`
+	Seconds int `json:"seconds,omitempty"`
 }
 
 type CreateClientSecretRequest struct {
 	// Configuration for the client secret expiration. Expiration refers to the time after which a client secret will no longer be valid for creating sessions. The session itself may continue after that time once started. A secret can be used to create multiple sessions until it expires.
-	ExpiresAfter ExpiresAfter `json:"expires_after,omitzero"`
+	ExpiresAfter *ExpiresAfter `json:"expires_after,omitempty"`
 
 	// Session configuration to use for the client secret. Choose either a realtime session or a transcription session.
-	Session SessionUnion `json:"session,omitzero"`
+	Session *SessionUnion `json:"session,omitempty"`
 }
 
 type CreateClientSecretResponse struct {
@@ -37,7 +37,7 @@ type CreateClientSecretResponse struct {
 	ClientSecret
 
 	// Session configuration to use for the client secret. Choose either a realtime session or a transcription session.
-	Session SessionUnion `json:"session,omitzero"`
+	Session *SessionUnion `json:"session,omitempty"`
 }
 
 type OpenAIError struct {

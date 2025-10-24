@@ -21,12 +21,12 @@ func TestCreateClientSecretRequest(t *testing.T) {
     "instructions": "You are a friendly assistant."
   }
 }`
-	expected := openairt.CreateClientSecretRequest{
-		ExpiresAfter: openairt.ExpiresAfter{
+	expected := &openairt.CreateClientSecretRequest{
+		ExpiresAfter: &openairt.ExpiresAfter{
 			Anchor:  "created_at",
 			Seconds: 600,
 		},
-		Session: openairt.SessionUnion{
+		Session: &openairt.SessionUnion{
 			Realtime: &openairt.RealtimeSession{
 				Model:        openairt.GPTRealtime,
 				Instructions: "You are a friendly assistant.",
@@ -37,7 +37,7 @@ func TestCreateClientSecretRequest(t *testing.T) {
 	var actual openairt.CreateClientSecretRequest
 	err := json.Unmarshal([]byte(data), &actual)
 	require.NoError(t, err)
-	require.Equal(t, expected, actual)
+	require.Equal(t, expected, &actual)
 
 	actualBytes, err := json.Marshal(actual)
 	require.NoError(t, err)
@@ -91,7 +91,7 @@ func TestCreateClientSecretResponse(t *testing.T) {
 			Value:     "ek_68af296e8e408191a1120ab6383263c2",
 			ExpiresAt: 1756310470,
 		},
-		Session: openairt.SessionUnion{
+		Session: &openairt.SessionUnion{
 			Realtime: &openairt.RealtimeSession{
 				ID:     "sess_C9CiUVUzUzYIssh3ELY1d",
 				Object: "realtime.session",
@@ -100,22 +100,22 @@ func TestCreateClientSecretResponse(t *testing.T) {
 					openairt.ModalityAudio,
 				},
 				Instructions: "You are a friendly assistant.",
-				Truncation: openairt.TruncationUnion{
+				Truncation: &openairt.TruncationUnion{
 					Strategy: openairt.TruncationStrategyAuto,
 				},
-				Audio: openairt.RealtimeSessionAudio{
+				Audio: &openairt.RealtimeSessionAudio{
 					Input: &openairt.SessionAudioInput{
-						Format: openairt.AudioFormatUnion{
+						Format: &openairt.AudioFormatUnion{
 							PCM: &openairt.AudioFormatPCM{
 								Rate: 24000,
 							},
 						},
-						TurnDetection: openairt.TurnDetectionUnion{
+						TurnDetection: &openairt.TurnDetectionUnion{
 							ServerVad: &openairt.ServerVad{},
 						},
 					},
 					Output: &openairt.SessionAudioOutput{
-						Format: openairt.AudioFormatUnion{
+						Format: &openairt.AudioFormatUnion{
 							PCM: &openairt.AudioFormatPCM{
 								Rate: 24000,
 							},
@@ -125,7 +125,7 @@ func TestCreateClientSecretResponse(t *testing.T) {
 					},
 				},
 				Tools:           []openairt.ToolUnion{},
-				ToolChoice:      openairt.ToolChoiceUnion{Mode: openairt.ToolChoiceModeAuto},
+				ToolChoice:      &openairt.ToolChoiceUnion{Mode: openairt.ToolChoiceModeAuto},
 				MaxOutputTokens: openairt.Inf,
 			},
 		},
