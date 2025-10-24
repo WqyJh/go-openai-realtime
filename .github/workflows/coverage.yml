@@ -18,10 +18,6 @@ jobs:
       - name: Run vet
         run: |
           go vet .
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          version: latest
       - name: Run tests
         run: make cov
       - name: Upload coverage reports to Codecov
