@@ -8,8 +8,8 @@ import (
 	"log"
 	"os"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
 	"github.com/WqyJh/go-openai-realtime/examples/voice/pcm"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 )
@@ -27,16 +27,16 @@ func main() {
 	// Teletype response
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioTranscriptDelta:
-			fmt.Printf(event.(openairt.ResponseAudioTranscriptDeltaEvent).Delta)
+		case openairt.ServerEventTypeResponseOutputAudioTranscriptDelta:
+			fmt.Printf(event.(openairt.ResponseOutputAudioTranscriptDeltaEvent).Delta)
 		}
 	}
 
 	// Full response
 	responseHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioTranscriptDone:
-			fmt.Printf("\n\n[full] %s\n\n", event.(openairt.ResponseAudioTranscriptDoneEvent).Transcript)
+		case openairt.ServerEventTypeResponseOutputAudioTranscriptDone:
+			fmt.Printf("\n\n[full] %s\n\n", event.(openairt.ResponseOutputAudioTranscriptDoneEvent).Transcript)
 			fmt.Print("> ")
 		}
 	}
@@ -67,8 +67,8 @@ func main() {
 	// Audio response
 	audioResponseHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioDelta:
-			msg := event.(openairt.ResponseAudioDeltaEvent)
+		case openairt.ServerEventTypeResponseOutputAudioDelta:
+			msg := event.(openairt.ResponseOutputAudioDeltaEvent)
 			// log.Printf("audioResponseHandler: %v", delta)
 			data, err := base64.StdEncoding.DecodeString(msg.Delta)
 			if err != nil {
@@ -77,7 +77,7 @@ func main() {
 			// os.WriteFile(fmt.Sprintf("%s.pcm", msg.EventID), data, 0o644)
 			// streamer.Append(data)
 			datas <- data
-		case openairt.ServerEventTypeResponseAudioDone:
+		case openairt.ServerEventTypeResponseOutputAudioDone:
 			fulldata := []byte{}
 			close(datas)
 			for data := range datas {
@@ -116,10 +116,20 @@ func main() {
 	connHandler.Start()
 
 	err = conn.SendMessage(ctx, &openairt.SessionUpdateEvent{
-		Session: openairt.ClientSession{
-			Modalities:        []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-			Voice:             openairt.VoiceShimmer,
-			OutputAudioFormat: openairt.AudioFormatPcm16,
+		Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				OutputModalities: []openairt.Modality{openairt.ModalityAudio},
+				Audio: openairt.RealtimeSessionAudio{
+					Output: &openairt.SessionAudioOutput{
+						Voice: openairt.VoiceMarin,
+						Format: openairt.AudioFormatUnion{
+							PCM: &openairt.AudioFormatPCM{
+								Rate: 24000,
+							},
+						},
+					},
+				},
+			},
 		},
 	})
 	if err != nil {
@@ -136,23 +146,23 @@ func main() {
 		}
 		fmt.Println("---------------------")
 		conn.SendMessage(ctx, &openairt.ConversationItemCreateEvent{
-			Item: openairt.MessageItem{
-				ID:     openairt.GenerateID("msg_", 10),
-				Status: openairt.ItemStatusCompleted,
-				Type:   openairt.MessageItemTypeMessage,
-				Role:   openairt.MessageRoleUser,
-				Content: []openairt.MessageContentPart{
-					{
-						Type: openairt.MessageContentTypeInputText,
-						Text: s.Text(),
+			Item: openairt.MessageItemUnion{
+				User: &openairt.MessageItemUser{
+					ID:     openairt.GenerateID("msg_", 10),
+					Status: openairt.ItemStatusCompleted,
+					Content: []openairt.MessageContentInput{
+						{
+							Type: openairt.MessageContentTypeInputText,
+							Text: s.Text(),
+						},
 					},
 				},
 			},
 		})
 		conn.SendMessage(ctx, &openairt.ResponseCreateEvent{
 			Response: openairt.ResponseCreateParams{
-				Modalities:      []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-				MaxOutputTokens: 4000,
+				OutputModalities: []openairt.Modality{openairt.ModalityAudio},
+				MaxOutputTokens:  4000,
 			},
 		})
 	}

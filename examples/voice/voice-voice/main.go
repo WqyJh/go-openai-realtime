@@ -10,13 +10,12 @@ import (
 	"os"
 	"time"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
 	"github.com/WqyJh/go-openai-realtime/examples/voice/pcm"
 	"github.com/WqyJh/go-openai-realtime/examples/voice/recorder"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/gordonklaus/portaudio"
-	"github.com/sashabaranov/go-openai"
 )
 
 func main() {
@@ -32,10 +31,10 @@ func main() {
 	// Teletype response
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioTranscriptDelta:
+		case openairt.ServerEventTypeResponseOutputAudioTranscriptDelta:
 			// ignore
-		case openairt.ServerEventTypeResponseAudioTranscriptDone:
-			fmt.Printf("[response] %s\n", event.(openairt.ResponseAudioTranscriptDoneEvent).Transcript)
+		case openairt.ServerEventTypeResponseOutputAudioTranscriptDone:
+			fmt.Printf("[response] %s\n", event.(openairt.ResponseOutputAudioTranscriptDoneEvent).Transcript)
 		}
 	}
 
@@ -80,8 +79,8 @@ func main() {
 	// Audio response
 	audioResponseHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseAudioDelta:
-			msg := event.(openairt.ResponseAudioDeltaEvent)
+		case openairt.ServerEventTypeResponseOutputAudioDelta:
+			msg := event.(openairt.ResponseOutputAudioDeltaEvent)
 			// log.Printf("audioResponseHandler: %v", delta)
 			data, err := base64.StdEncoding.DecodeString(msg.Delta)
 			if err != nil {
@@ -90,7 +89,7 @@ func main() {
 			// os.WriteFile(fmt.Sprintf("%s.pcm", msg.EventID), data, 0o644)
 			// streamer.Append(data)
 			datas <- data
-		case openairt.ServerEventTypeResponseAudioDone:
+		case openairt.ServerEventTypeResponseOutputAudioDone:
 			fulldata := []byte{}
 			close(datas)
 			for data := range datas {
@@ -129,15 +128,26 @@ func main() {
 	connHandler.Start()
 
 	err = conn.SendMessage(ctx, openairt.SessionUpdateEvent{
-		Session: openairt.ClientSession{
-			Modalities:        []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
-			Voice:             openairt.VoiceShimmer,
-			OutputAudioFormat: openairt.AudioFormatPcm16,
-			InputAudioTranscription: &openairt.InputAudioTranscription{
-				Model: openai.Whisper1,
+		Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				OutputModalities: []openairt.Modality{openairt.ModalityAudio},
+				Audio: openairt.RealtimeSessionAudio{
+					Input: &openairt.SessionAudioInput{
+						Transcription: openairt.AudioTranscription{
+							Model: openairt.GPTRealtime,
+						},
+					},
+					Output: &openairt.SessionAudioOutput{
+						Voice: openairt.VoiceMarin,
+						Format: openairt.AudioFormatUnion{
+							PCM: &openairt.AudioFormatPCM{
+								Rate: 24000,
+							},
+						},
+					},
+				},
+				MaxOutputTokens: 4000,
 			},
-			TurnDetection:   nil,
-			MaxOutputTokens: 4000,
 		},
 	})
 	if err != nil {
@@ -187,7 +197,7 @@ Loop:
 			conn.SendMessage(ctx, openairt.InputAudioBufferCommitEvent{})
 			conn.SendMessage(ctx, openairt.ResponseCreateEvent{
 				Response: openairt.ResponseCreateParams{
-					Modalities: []openairt.Modality{openairt.ModalityText, openairt.ModalityAudio},
+					OutputModalities: []openairt.Modality{openairt.ModalityAudio},
 				},
 			})
 		}

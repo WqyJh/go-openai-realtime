@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 )
 
 func main() {
@@ -26,8 +26,8 @@ func main() {
 	// Teletype response
 	responseDeltaHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
-		case openairt.ServerEventTypeResponseTextDelta:
-			fmt.Printf(event.(openairt.ResponseTextDeltaEvent).Delta)
+		case openairt.ServerEventTypeResponseOutputTextDelta:
+			fmt.Printf(event.(openairt.ResponseOutputTextDeltaEvent).Delta)
 		}
 	}
 
@@ -35,7 +35,7 @@ func main() {
 	responseHandler := func(ctx context.Context, event openairt.ServerEvent) {
 		switch event.ServerEventType() {
 		case openairt.ServerEventTypeResponseDone:
-			fmt.Printf("\n\n[full] %s\n\n", event.(openairt.ResponseDoneEvent).Response.Output[0].Content[0].Text)
+			fmt.Printf("\n\n[full] %s\n\n", event.(openairt.ResponseDoneEvent).Response.Output[0].Assistant.Content[0].Text)
 			fmt.Print("> ")
 		}
 	}
@@ -44,8 +44,10 @@ func main() {
 	connHandler.Start()
 
 	err = conn.SendMessage(ctx, &openairt.SessionUpdateEvent{
-		Session: openairt.ClientSession{
-			Modalities: []openairt.Modality{openairt.ModalityText},
+		Session: openairt.SessionUnion{
+			Realtime: &openairt.RealtimeSession{
+				OutputModalities: []openairt.Modality{openairt.ModalityText},
+			},
 		},
 	})
 	if err != nil {
@@ -80,23 +82,23 @@ func main() {
 		}
 		sendLock.Lock()
 		conn.SendMessage(ctx, &openairt.ConversationItemCreateEvent{
-			Item: openairt.MessageItem{
-				ID:     openairt.GenerateID("msg_", 10),
-				Status: openairt.ItemStatusCompleted,
-				Type:   openairt.MessageItemTypeMessage,
-				Role:   openairt.MessageRoleUser,
-				Content: []openairt.MessageContentPart{
-					{
-						Type: openairt.MessageContentTypeInputText,
-						Text: s.Text(),
+			Item: openairt.MessageItemUnion{
+				User: &openairt.MessageItemUser{
+					ID:     openairt.GenerateID("msg_", 10),
+					Status: openairt.ItemStatusCompleted,
+					Content: []openairt.MessageContentInput{
+						{
+							Type: openairt.MessageContentTypeInputText,
+							Text: s.Text(),
+						},
 					},
 				},
 			},
 		})
 		conn.SendMessage(ctx, &openairt.ResponseCreateEvent{
 			Response: openairt.ResponseCreateParams{
-				Modalities:      []openairt.Modality{openairt.ModalityText},
-				MaxOutputTokens: 4000,
+				OutputModalities: []openairt.Modality{openairt.ModalityText},
+				MaxOutputTokens:  4000,
 			},
 		})
 		sendLock.Unlock()

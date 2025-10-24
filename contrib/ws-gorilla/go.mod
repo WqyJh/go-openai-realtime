@@ -1,11 +1,11 @@
 module github.com/WqyJh/go-openai-realtime/contrib/ws-gorilla
 
-go 1.19
+go 1.24
 
 // replace github.com/WqyJh/go-openai-realtime => ../../
 
 require (
-	github.com/WqyJh/go-openai-realtime v0.3.5-0.20250208091501-af3079f3fb2b
+	github.com/WqyJh/go-openai-realtime/v2 v2.0.0-beta
 	github.com/gorilla/websocket v1.5.3
 	github.com/stretchr/testify v1.9.0
 )
