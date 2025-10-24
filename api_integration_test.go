@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 	"github.com/stretchr/testify/require"
 )
 

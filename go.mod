@@ -1,4 +1,4 @@
-module github.com/WqyJh/go-openai-realtime
+module github.com/WqyJh/go-openai-realtime/v2
 
 go 1.24
 

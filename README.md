@@ -32,7 +32,7 @@ import (
 	"log"
 	"os"
 
-	openairt "github.com/WqyJh/go-openai-realtime"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 )
 
 func main() {
@@ -52,7 +52,7 @@ Switch to another websocket dialer [gorilla/websocket](https://github.com/gorill
 
 ```go
 import (
-	openairt "github.com/WqyJh/go-openai-realtime"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 	gorilla "github.com/WqyJh/go-openai-realtime/contrib/ws-gorilla"
 )
 
@@ -74,7 +74,7 @@ func main() {
 ```go
 
 import (
-	openairt "github.com/WqyJh/go-openai-realtime"
+	openairt "github.com/WqyJh/go-openai-realtime/v2"
 )
 
 func main() {
