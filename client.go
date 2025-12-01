@@ -53,13 +53,7 @@ func NewClientWithConfig(config ClientConfig) *Client {
 
 func (c *Client) getURL(model string) string {
 	query := url.Values{}
-
-	if c.config.APIType == APITypeAzure {
-		query.Set("api-version", c.config.APIVersion)
-		query.Set("deployment", model)
-	} else {
-		query.Set("model", model)
-	}
+	query.Set("model", model)
 
 	return c.config.BaseURL + "?" + query.Encode()
 }
@@ -159,7 +153,10 @@ func (c *Client) getAPIHeaders() http.Header {
 	return headers
 }
 
-func (c *Client) CreateClientSecret(ctx context.Context, req *CreateClientSecretRequest) (*CreateClientSecretResponse, error) {
+func (c *Client) CreateClientSecret(
+	ctx context.Context,
+	req *CreateClientSecretRequest,
+) (*CreateClientSecretResponse, error) {
 	return HTTPDo[CreateClientSecretRequest, CreateClientSecretResponse](
 		ctx,
 		c.config.APIBaseURL+"/realtime/client_secrets",
