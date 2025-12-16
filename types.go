@@ -674,7 +674,7 @@ func (r TurnDetectionUnion) MarshalJSON() ([]byte, error) {
 	if r.SemanticVad != nil {
 		return json.Marshal(r.SemanticVad)
 	}
-	return nil, errors.New("no turn detection")
+	return json.Marshal(nil)
 }
 
 func (r *TurnDetectionUnion) UnmarshalJSON(data []byte) error {
@@ -713,7 +713,7 @@ type SessionAudioInput struct {
 	NoiseReduction *AudioNoiseReduction `json:"noise_reduction,omitempty"`
 
 	// Configuration for input audio transcription, defaults to off and can be set to null to turn off once on. Input audio transcription is not native to the model, since the model consumes audio directly. Transcription runs asynchronously through the /audio/transcriptions endpoint and should be treated as guidance of input audio content rather than precisely what the model heard. The client can optionally set the language and prompt for transcription, these offer additional guidance to the transcription service.
-	TurnDetection *TurnDetectionUnion `json:"turn_detection,omitempty"`
+	TurnDetection *TurnDetectionUnion `json:"turn_detection"`
 
 	// Configuration for turn detection, ether Server VAD or Semantic VAD. This can be set to null to turn off, in which case the client must manually trigger model response.
 	//
