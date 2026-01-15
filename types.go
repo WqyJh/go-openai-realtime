@@ -674,7 +674,8 @@ func (r TurnDetectionUnion) MarshalJSON() ([]byte, error) {
 	if r.SemanticVad != nil {
 		return json.Marshal(r.SemanticVad)
 	}
-	return nil, errors.New("no turn detection")
+	// Return JSON "null" to disable turn detection.
+	return json.Marshal(nil)
 }
 
 func (r *TurnDetectionUnion) UnmarshalJSON(data []byte) error {
