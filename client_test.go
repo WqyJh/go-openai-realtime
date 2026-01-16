@@ -30,7 +30,7 @@ func TestClient(t *testing.T) {
 	require.Equal(t, APITypeAzure, client.config.APIType)
 	require.Equal(t, azureAPIVersion20241001Preview, client.config.APIVersion)
 	url = client.getURL("test-model")
-	require.Equal(t, azureURL+"?api-version="+azureAPIVersion20241001Preview+"&deployment=test-model", url)
+	require.Equal(t, azureURL+"?model=test-model", url)
 	headers = client.getHeaders()
 	require.Equal(t, mockToken, headers.Get("api-key"))
 }
