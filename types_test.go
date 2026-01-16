@@ -46,19 +46,40 @@ func TestToolChoiceUnion(t *testing.T) {
 }
 
 func TestTurnDetectionUnion(t *testing.T) {
-	data := `{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,"silence_duration_ms":200,"idle_timeout_ms":null,"create_response":true,"interrupt_response":true}`
-	expected := openairt.TurnDetectionUnion{
-		ServerVad: &openairt.ServerVad{
-			Threshold:         0.5,
-			PrefixPaddingMs:   300,
-			SilenceDurationMs: 200,
-			IdleTimeoutMs:     0,
-			CreateResponse:    true,
-			InterruptResponse: true,
-		},
-	}
-	actual := openairt.TurnDetectionUnion{}
-	err := json.Unmarshal([]byte(data), &actual)
-	require.NoError(t, err)
-	require.Equal(t, expected, actual)
+	t.Run("unmarshal server_vad", func(t *testing.T) {
+		data := `{"type":"server_vad","threshold":0.5,"prefix_padding_ms":300,"silence_duration_ms":200,"idle_timeout_ms":null,"create_response":true,"interrupt_response":true}`
+		expected := openairt.TurnDetectionUnion{
+			ServerVad: &openairt.ServerVad{
+				Threshold:         0.5,
+				PrefixPaddingMs:   300,
+				SilenceDurationMs: 200,
+				IdleTimeoutMs:     0,
+				CreateResponse:    true,
+				InterruptResponse: true,
+			},
+		}
+		actual := openairt.TurnDetectionUnion{}
+		err := json.Unmarshal([]byte(data), &actual)
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("unmarshal null", func(t *testing.T) {
+		// Unmarshaling JSON "null" should produce an empty TurnDetectionUnion.
+		data := `null`
+		expected := openairt.TurnDetectionUnion{}
+		actual := openairt.TurnDetectionUnion{}
+		err := json.Unmarshal([]byte(data), &actual)
+		require.NoError(t, err)
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("marshal null", func(t *testing.T) {
+		// Marshaling an empty TurnDetectionUnion should produce JSON "null"
+		// to disable turn detection.
+		input := openairt.TurnDetectionUnion{}
+		data, err := json.Marshal(input)
+		require.NoError(t, err)
+		require.Equal(t, "null", string(data))
+	})
 }
