@@ -109,7 +109,7 @@ func WithLogger(logger Logger) ConnectOption {
 // Connect connects to the OpenAI Realtime API.
 func (c *Client) Connect(ctx context.Context, opts ...ConnectOption) (*Conn, error) {
 	connectOpts := connectOption{
-		model:  GPT4oRealtimePreview,
+		model:  GPTRealtime,
 		logger: NopLogger{},
 	}
 	for _, opt := range opts {
